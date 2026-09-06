@@ -31,7 +31,7 @@ export default async function AboutPage() {
 						About {SITE_NAME}
 					</h1>
 					<p className="mt-6 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
-						{SITE_NAME} was built with a simple mission: make QR
+						{SITE_NAME} &nbsp;was built with a simple mission: make QR
 						code creation fast, beautiful, and insightful. Whether
 						you need a quick Direct QR code for your restaurant menu
 						or a Tracked QR code with full scan analytics for your
