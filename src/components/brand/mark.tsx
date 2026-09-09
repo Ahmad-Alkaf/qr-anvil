@@ -29,10 +29,10 @@ export function Logo({
   tagline?: boolean;
   className?: string;
 }) {
-  const mark = size === "lg" ? "size-10" : size === "sm" ? "size-7" : "size-8";
-  const text = size === "lg" ? "text-2xl" : size === "sm" ? "text-base" : "text-xl";
+  const mark = size === "lg" ? "size-12" : size === "sm" ? "size-7" : tagline ? "size-10" : "size-8";
+  const text = size === "lg" ? "text-3xl" : size === "sm" ? "text-base" : tagline ? "text-2xl" : "text-xl";
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
+    <span className={cn("inline-flex items-center gap-3", className)}>
       <Mark className={cn(mark, "text-primary")} />
       <span className="flex flex-col leading-none">
         <span className={cn("font-heading font-bold tracking-tight", text)}>
@@ -40,7 +40,7 @@ export function Logo({
           <span className="text-gray-900 dark:text-white"> Anvil</span>
         </span>
         {tagline && (
-          <span className="mt-1 font-heading text-[10px] font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+          <span className="mt-1 font-heading text-xs font-normal italic tracking-normal text-gray-500 dark:text-gray-400">
             {BRAND_TAGLINE}
           </span>
         )}

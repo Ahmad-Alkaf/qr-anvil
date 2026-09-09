@@ -11,8 +11,7 @@ import {Logo} from '@/components/brand/mark';
 const navLinks = [
 	{href: '/qr-types', label: 'QR Types'},
 	{href: '/support', label: 'Support Me'},
-	{href: '/about', label: 'About'},
-	{href: '/contact', label: 'Contact'}
+	{href: '/about', label: 'About'}
 ];
 
 export function Header() {

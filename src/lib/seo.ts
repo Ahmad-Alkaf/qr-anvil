@@ -9,9 +9,9 @@ import type { QRTypeFaq } from "@/lib/qr-type-content";
  */
 
 /** Date the public copy last changed. Update it when the wording changes. */
-export const CONTENT_LAST_MODIFIED = new Date("2026-09-02");
+export const CONTENT_LAST_MODIFIED = new Date("2026-09-07");
 
-export const SITE_TAGLINE = "Free QR Code Generator with Scan Analytics";
+export const SITE_TAGLINE = "Free QR Codes Made Simple";
 
 /** One-paragraph description reused by structured data and llms.txt. */
 export const SITE_SUMMARY =

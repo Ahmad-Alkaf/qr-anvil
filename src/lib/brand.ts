@@ -5,7 +5,7 @@ export const BRAND_ORANGE = "#C45B28";
 export const MARK_VIEWBOX = "0 0 64 64";
 
 // Short line under the wordmark in the header lockup.
-export const BRAND_TAGLINE = "Shape Your Codes";
+export const BRAND_TAGLINE = "Made for every scan.";
 
 // "Cleft Corner": a solid tile in the SetupForge family shape (top-left
 // corner rounded, radius 18 on a 64 grid) with the bottom-right corner cut

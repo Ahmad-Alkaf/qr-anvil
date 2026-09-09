@@ -9,7 +9,6 @@ const DISALLOW = [
   "/r/",
   "/sign-in",
   "/sign-up",
-  "/contact/success",
   "/pricing",
 ];
 

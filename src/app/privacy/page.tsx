@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 // Keep this date equal to the day the wording last changed.
-const LAST_UPDATED = 'September 2, 2026';
+const LAST_UPDATED = 'September 7, 2026';
 
 export default function PrivacyPage() {
 	return (
@@ -71,11 +71,6 @@ export default function PrivacyPage() {
 								downloaded. It contains no content and no
 								account identifier.
 							</li>
-							<li>
-								<strong>Contact messages:</strong> the subject
-								and message you send through the contact form,
-								together with your account name and email.
-							</li>
 						</ul>
 					</section>
 
@@ -88,9 +83,6 @@ export default function PrivacyPage() {
 							<li>To manage your account</li>
 							<li>
 								To provide scan analytics for Tracked QR codes
-							</li>
-							<li>
-								To answer your contact messages
 							</li>
 							<li>
 								To improve the Service and develop new features
@@ -158,8 +150,8 @@ export default function PrivacyPage() {
 							Account data, QR codes, and scan analytics are
 							retained for as long as your account exists. When you
 							delete your account, your account record, your QR
-							codes, their scan data, and your contact messages
-							are deleted. Tracked QR codes stop working at that
+							codes, and their scan data are deleted. Tracked QR
+							codes stop working at that
 							point. Anonymous usage counters contain no personal
 							data and are kept.
 						</p>

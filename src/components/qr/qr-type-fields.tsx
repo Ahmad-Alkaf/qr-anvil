@@ -97,24 +97,24 @@ function URLFields({ onChange }: FieldProps) {
       />
       {warning === "protocol" ? (
         <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
-          It looks like you forgot the protocol. Did you mean{" "}
-          <strong>https://{inputValue}</strong>?{" "}
+          This web address must start with https://. Use{" "}
+          <strong>https://{inputValue}</strong>.{" "}
           <button
             type="button"
             onClick={prefixWithHttps}
             className="font-semibold underline hover:text-amber-700 dark:hover:text-amber-300"
           >
-            Yes
+            Use this address
           </button>
         </p>
       ) : warning === "domain" ? (
         <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
-          This doesn&apos;t look like a valid URL. Make sure it includes a
-          domain like <strong>https://example.com</strong>
+          Enter a complete web address, such as{" "}
+          <strong>https://example.com</strong>.
         </p>
       ) : (
         <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-          The full URL including https://
+          Include https:// at the start.
         </p>
       )}
     </div>
@@ -139,7 +139,7 @@ function WiFiFields({ onChange }: FieldProps) {
   return (
     <div className="space-y-4">
       <div>
-        <label className={labelClass}>Network Name (SSID)</label>
+        <label className={labelClass}>Wi-Fi Network Name</label>
         <IconInput
           icon={Wifi}
           type="text"
@@ -170,7 +170,7 @@ function WiFiFields({ onChange }: FieldProps) {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Encryption</label>
+          <label className={labelClass}>Security Type</label>
           <select
             value={encryption}
             onChange={(e) => setEncryption(e.target.value)}
@@ -332,7 +332,7 @@ function EmailFields({ onChange }: FieldProps) {
   return (
     <div className="space-y-4">
       <div>
-        <label className={labelClass}>Recipient Email</label>
+        <label className={labelClass}>Send Email To</label>
         <IconInput
           icon={Mail}
           type="email"
@@ -354,7 +354,7 @@ function EmailFields({ onChange }: FieldProps) {
       <div>
         <label className={labelClass}>Message <span className="font-normal text-gray-400">(optional)</span></label>
         <textarea
-          placeholder="Email body text..."
+          placeholder="Write the email message..."
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={3}
@@ -392,7 +392,7 @@ function SMSFields({ onChange }: FieldProps) {
       <div>
         <label className={labelClass}>Message <span className="font-normal text-gray-400">(optional)</span></label>
         <textarea
-          placeholder="Pre-filled text message..."
+          placeholder="Write the text message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
@@ -427,13 +427,13 @@ function WhatsAppFields({ onChange }: FieldProps) {
           onChange={(e) => setPhone(e.target.value)}
         />
         <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-          Include country code (e.g. +1 for US, +44 for UK)
+          Include the country code, such as +1 for the US or +44 for the UK.
         </p>
       </div>
       <div>
         <label className={labelClass}>Message <span className="font-normal text-gray-400">(optional)</span></label>
         <textarea
-          placeholder="Pre-filled WhatsApp message..."
+          placeholder="Write the WhatsApp message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
@@ -455,7 +455,7 @@ function PDFFields({ onChange }: FieldProps) {
         onChange={(e) => onChange(e.target.value)}
       />
       <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-        Direct URL to a publicly accessible PDF file
+        Use a public link that opens the PDF without a sign-in.
       </p>
     </div>
   );
@@ -464,11 +464,11 @@ function PDFFields({ onChange }: FieldProps) {
 function PlainTextField({ onChange }: FieldProps) {
   return (
     <div>
-      <label className={labelClass}>Text Content</label>
+      <label className={labelClass}>Text to Show</label>
       <div className="relative">
         <Type className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
         <textarea
-          placeholder="Enter any text you'd like to encode..."
+          placeholder="Enter the text that people will see..."
           onChange={(e) => onChange(e.target.value)}
           rows={4}
           className={`${textareaClass} pl-11`}

@@ -69,30 +69,27 @@ export default async function AboutPage() {
 						</p>
 						<ul className="mt-4 list-inside list-disc space-y-2">
 							<li>
-								<strong>Direct QR codes</strong> — encode your
-								content directly into the QR image. No redirect,
-								no latency, no server dependency. Perfect for
-								Wi-Fi passwords, contact cards, and menus.
+								<strong>Direct QR codes</strong> open the saved
+								information immediately. They are a good choice for
+								Wi-Fi passwords, contact cards, text, and simple links.
 							</li>
 							<li>
-								<strong>Tracked QR codes</strong> — route
-								through our redirect server to capture scan
-								analytics (location, device, time) and allow you
-								to edit the destination URL after printing.
+								<strong>Tracked QR codes</strong> count scans and
+								show the place, device, and time. You can also change
+								the link after you print the code.
 							</li>
 						</ul>
 					</div>
 
 					<div>
 						<h2 className="font-heading text-2xl font-bold text-gray-900 dark:text-white">
-							Built for Performance
+							Fast and Private
 						</h2>
 						<p className="mt-4 leading-relaxed">
-							{SITE_NAME} is built on Next.js with server-side
-							rendering for lightning-fast page loads, optimized
-							for SEO, and designed to work beautifully on any
-							device. QR codes are generated client-side in your
-							browser for instant, private output.
+							{SITE_NAME} works on phones, tablets, and computers.
+							It makes Direct QR codes on your device, so your
+							information does not leave the browser when you create
+							or download the code.
 						</p>
 					</div>
 				</div>

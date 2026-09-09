@@ -34,11 +34,11 @@ export default function OpenGraphImage() {
               </div>
               <div
                 style={{
-                  marginTop: 8,
-                  fontSize: 15,
-                  letterSpacing: 4,
-                  textTransform: "uppercase",
-                  color: "#8b93a0",
+                  marginTop: 10,
+                  fontSize: 18,
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  color: "#9ca3af",
                 }}
               >
                 {BRAND_TAGLINE}

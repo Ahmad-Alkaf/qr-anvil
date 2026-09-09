@@ -55,19 +55,6 @@ CREATE TABLE "Scan" (
     CONSTRAINT "Scan_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ContactMessage" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "subject" TEXT NOT NULL,
-    "message" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "ContactMessage_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
 
@@ -101,12 +88,6 @@ CREATE INDEX "Scan_scannedAt_idx" ON "Scan"("scannedAt");
 -- CreateIndex
 CREATE INDEX "Scan_qrCodeId_scannedAt_idx" ON "Scan"("qrCodeId", "scannedAt");
 
--- CreateIndex
-CREATE INDEX "ContactMessage_userId_idx" ON "ContactMessage"("userId");
-
--- CreateIndex
-CREATE INDEX "ContactMessage_createdAt_idx" ON "ContactMessage"("createdAt");
-
 -- AddForeignKey
 ALTER TABLE "QRCode" ADD CONSTRAINT "QRCode_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -115,6 +96,3 @@ ALTER TABLE "Scan" ADD CONSTRAINT "Scan_qrCodeId_fkey" FOREIGN KEY ("qrCodeId") 
 
 -- AddForeignKey
 ALTER TABLE "Scan" ADD CONSTRAINT "Scan_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ContactMessage" ADD CONSTRAINT "ContactMessage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

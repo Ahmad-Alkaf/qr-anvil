@@ -24,7 +24,7 @@ Before work in this repository, read `../AGENTS.md` for shared organization and 
 
 ### Brand
 
-- Product name is **QR Anvil** (two words in copy; `qr-anvil` in file names and the domain `qr-anvil.com`, apex only, no www). The repository folder is `qranvil/`.
+- Product name is **QR Anvil** (two words in copy; `qr-anvil` in file names and the domain `qr-anvil.com`, apex only, no www). The repository folder is `qr-anvil/`.
 - The mark ("Cleft Corner") lives in `src/lib/brand.ts` as `MARK_PATH`. `src/components/brand/mark.tsx` renders it (`Mark`, `Logo`). `npm run icons` regenerates `public/logo/*`, both `favicon.ico` files, and `../kaflabs/qr-anvil-icon.png` from that path. Never hand-edit the PNGs.
 - Header tagline is `BRAND_TAGLINE` in `src/lib/brand.ts`. The SEO tagline is separate (`SITE_TAGLINE` in `src/lib/seo.ts`).
 
@@ -39,7 +39,7 @@ Before work in this repository, read `../AGENTS.md` for shared organization and 
 ### Data layer
 
 - Prisma schema at `prisma/schema.prisma`. Generated client output goes to `src/generated/prisma/` (do NOT edit generated files).
-- Models: `User`, `QRCode` (with `QRType` enum), `Scan`, `ContactMessage`.
+- Models: `User`, `QRCode` (with `QRType` enum), `Scan`, and `QRGenEvent`.
 - DB connection uses the `PrismaPg` adapter with `DATABASE_URL` env var.
 
 ### Project structure

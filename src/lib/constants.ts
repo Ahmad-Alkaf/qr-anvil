@@ -11,58 +11,58 @@ export const LEGAL_EMAIL = "legal@kaflabs.com";
 
 // KafLabs is the parent brand. Product footers link to the shared legal pages.
 export const KAFLABS_URL = "https://kaflabs.com";
-export const KAFLABS_PRIVACY_URL = "https://kaflabs.com/privacy.html";
-export const KAFLABS_TERMS_URL = "https://kaflabs.com/terms.html";
+export const KAFLABS_PRIVACY_URL = "https://kaflabs.com/privacy";
+export const KAFLABS_TERMS_URL = "https://kaflabs.com/terms";
 
 export const SITE_DESCRIPTION =
-  "Create free QR codes for URLs, Wi-Fi, vCards, and more. Customize colors and track scans with analytics.";
+  "Create free QR codes for links, Wi-Fi, contacts, messages, PDFs, and more. Customize the design, download your code, and track scans when you need to.";
 
 export const QR_TYPE_INFO = {
   URL: {
     label: "URL",
-    description: "Link to any website or web page",
+    description: "Open any website or web page",
     icon: "Link",
     slug: "url",
   },
   WIFI: {
     label: "Wi-Fi",
-    description: "Share Wi-Fi network credentials instantly",
+    description: "Let guests join your Wi-Fi",
     icon: "Wifi",
     slug: "wifi",
   },
   VCARD: {
     label: "vCard",
-    description: "Share contact information digitally",
+    description: "Save your contact details",
     icon: "Contact",
     slug: "vcard",
   },
   EMAIL: {
     label: "Email",
-    description: "Pre-compose an email message",
+    description: "Open a ready-to-send email",
     icon: "Mail",
     slug: "email",
   },
   SMS: {
     label: "SMS",
-    description: "Pre-compose a text message",
+    description: "Open a ready-to-send text",
     icon: "MessageSquare",
     slug: "sms",
   },
   WHATSAPP: {
     label: "WhatsApp",
-    description: "Open a WhatsApp chat with a message",
+    description: "Start a WhatsApp chat",
     icon: "MessageCircle",
     slug: "whatsapp",
   },
   PDF: {
     label: "PDF",
-    description: "Link directly to a PDF document",
+    description: "Open a menu, guide, or document",
     icon: "FileText",
     slug: "pdf",
   },
   PLAIN_TEXT: {
     label: "Plain Text",
-    description: "Encode any text into a QR code",
+    description: "Show a note, code, or short message",
     icon: "Type",
     slug: "plain-text",
   },

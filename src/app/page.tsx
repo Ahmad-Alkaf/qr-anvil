@@ -17,7 +17,7 @@ import {
 import Link from 'next/link';
 import {QRGenerator} from '@/components/qr/qr-generator';
 import {JsonLd} from '@/components/seo/json-ld';
-import {SITE_NAME} from '@/lib/constants';
+import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/constants';
 import {getSiteStats, formatCount} from '@/lib/stats';
 import {
 	faqJsonLd,
@@ -50,7 +50,7 @@ const qrTypes = [
 		icon: Mail,
 		label: 'Email',
 		slug: 'email',
-		description: 'Pre-compose emails'
+		description: 'Open a ready-to-send email'
 	},
 	{
 		icon: MessageSquare,
@@ -74,73 +74,73 @@ const qrTypes = [
 		icon: Type,
 		label: 'Plain Text',
 		slug: 'plain-text',
-		description: 'Encode any text'
+		description: 'Show a note or message'
 	}
 ];
 
 const features = [
 	{
 		icon: Zap,
-		title: 'Instant Generation',
+		title: 'Ready in Seconds',
 		description:
-			'Create QR codes in seconds. Choose Direct mode for lightning-fast scans or Tracked mode for analytics.'
+			'Add your information and get a QR code that is ready to download and share.'
 	},
 	{
 		icon: Palette,
-		title: 'Full Customization',
+		title: 'Make It Yours',
 		description:
-			'Customize colors and choose from multiple dot styles to match your brand.'
+			'Choose colors and pattern styles that fit your sign, menu, card, or brand.'
 	},
 	{
 		icon: BarChart3,
-		title: 'Scan Analytics',
+		title: 'See What Gets Scanned',
 		description:
-			'Track scans with Tracked QR codes: see location, device, time, and more in real-time.'
+			'Use a Tracked QR code to see scan totals, places, devices, and times.'
 	},
 	{
 		icon: Shield,
-		title: 'Private by Design',
+		title: 'Your Data Stays Private',
 		description:
-			'QR images are generated in your browser. Direct QR codes never touch our server, and nothing is stored unless you sign in.'
+			'Direct QR codes are made on your device. We do not save their information unless you sign in.'
 	}
 ];
 
 const howItWorks = [
 	{
 		step: '1',
-		title: 'Choose Your Type',
+		title: 'Choose What to Share',
 		description:
 			'Select what kind of QR code you need: URL, Wi-Fi, vCard, Email, SMS, WhatsApp, PDF, or Plain Text.'
 	},
 	{
 		step: '2',
-		title: 'Customize & Choose Mode',
+		title: 'Choose How It Works',
 		description:
-			'Set colors and dot style. Pick Direct mode for speed or Tracked mode for scan analytics and an editable destination.'
+			'Choose the design. Use Direct for a simple code, or Tracked to count scans and change the link later.'
 	},
 	{
 		step: '3',
 		title: 'Download & Share',
 		description:
-			'Download your QR code as PNG, SVG, or PDF. Print it or share it digitally.'
+			'Download a PNG, SVG, or PDF. Add it to a sign, menu, card, package, or screen.'
 	}
 ];
 
 const comparison = [
 	{
-		feature: 'Where the content lives',
-		direct: 'Inside the QR image',
-		tracked: 'On a short QR Anvil redirect link'
+		feature: 'What happens after a scan',
+		direct: 'Opens the saved information',
+		tracked: 'Opens your link and counts the scan'
 	},
 	{
-		feature: 'Scan speed',
-		direct: 'Instant, no redirect',
-		tracked: 'One quick redirect'
+		feature: 'Best for',
+		direct: 'Simple sharing and offline use',
+		tracked: 'Campaigns, menus, and printed links'
 	},
 	{
 		feature: 'Scan analytics',
 		direct: 'No',
-		tracked: 'Country, city, device, browser, time'
+		tracked: 'Country, city, device, browser, and time'
 	},
 	{
 		feature: 'Edit destination after printing',
@@ -189,8 +189,8 @@ const faqs = [
 		a: 'PNG, SVG, and PDF. PNG is available to everyone. SVG and PDF require a free account. All three files are generated in your browser.'
 	},
 	{
-		q: 'What does Error Correction do?',
-		a: 'QR codes have built-in error correction that lets them scan even when partially damaged or covered. Low recovers 7%, Medium 15%, Quartile 25%, and High 30% of the code. Higher levels make the QR code denser but more robust. Use High if you plan to place a logo on top. For short content, lower levels can look identical because the encoder upgrades the error correction when there is spare capacity.'
+		q: 'What does Scan Reliability do?',
+		a: 'This setting helps a QR code work when part of it is damaged, dirty, or covered. A higher setting adds more protection, but it also makes the pattern more detailed. Use Recommended for most QR codes. Use Maximum for small prints or if you put a logo on the code.'
 	},
 	{
 		q: `Does ${SITE_NAME} add a watermark or expire QR codes?`,
@@ -209,8 +209,7 @@ export default async function HomePage() {
 		webPageJsonLd({
 			path: '/',
 			name: `${SITE_NAME}: Free QR Code Generator`,
-			description:
-				'Create free QR codes for URLs, Wi-Fi, vCards, and more. Customize colors and track scans with analytics.'
+			description: SITE_DESCRIPTION
 		}),
 		webApplicationJsonLd(),
 		howToJsonLd(
@@ -233,23 +232,22 @@ export default async function HomePage() {
 					<div className="text-center">
 						<div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-50 px-4 py-1.5 text-sm font-medium text-primary dark:border-primary/30 dark:bg-primary/10">
 							<Zap className="h-3.5 w-3.5" />
-							100% Free — No Credit Card Required
+							Free to Use — No Credit Card Needed
 						</div>
 						<h1
 							id="hero-heading"
 							className="font-heading text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl dark:text-white">
-							Free QR Code Generator
+							Make a QR Code for Anything You Share
 							<br />
 							<span className="text-primary">
-								Create Custom QR Codes in Seconds
+								Free and Ready in Seconds
 							</span>
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-							Generate free QR codes for URLs, Wi-Fi, vCards, and
-							more. Choose <strong>Direct</strong> for instant
-							scans or <strong>Tracked</strong> for scan
-							analytics. Customize colors and download as PNG,
-							SVG, or PDF.
+							Turn a link, Wi-Fi password, contact card, message,
+							or PDF into a QR code. Make it match your style,
+							download it, and share it. Need results? Use a
+							Tracked code to count scans and update the link later.
 						</p>
 					</div>
 
@@ -301,12 +299,12 @@ export default async function HomePage() {
 						What is {SITE_NAME}?
 					</h2>
 					<p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
-						{SITE_NAME} is a free online QR code generator made by
-						KafLabs. It creates QR codes for 8 content types, renders
-						them in your browser, and exports PNG, SVG, and PDF
-						files. Tracked QR codes add scan analytics and a
-						destination URL that you can change after printing.
-						There is no watermark, no expiry, and no credit card.
+						{SITE_NAME} helps you turn links, Wi-Fi access, contact
+						details, messages, PDFs, and text into QR codes. Choose
+						your colors, download a PNG, SVG, or PDF, and share it
+						anywhere. Tracked codes can count scans and let you
+						change a link after you print the code. There is no
+						watermark, expiry, or credit card requirement.
 					</p>
 				</div>
 			</section>
@@ -320,11 +318,10 @@ export default async function HomePage() {
 						<h2
 							id="types-heading"
 							className="font-heading text-3xl font-bold text-gray-900 dark:text-white">
-							QR Codes for Every Use Case
+							A QR Code for Every Task
 						</h2>
 						<p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-							Generate QR codes for URLs, Wi-Fi, contacts, and
-							more
+							Help people open, join, save, read, or reply with one scan.
 						</p>
 					</div>
 					<div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-4">
@@ -550,12 +547,12 @@ export default async function HomePage() {
 						Ready to Create Your QR Code?
 					</h2>
 					<p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-						Start creating QR codes — it&apos;s free.
+						Create a useful QR code now. It is free.
 					</p>
 					<Link
 						href="/#generator"
 						className="mt-8 inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-primary-dark hover:shadow-xl">
-						Create QR Code Now
+						Create Your QR Code
 						<ArrowRight className="h-5 w-5" />
 					</Link>
 				</div>

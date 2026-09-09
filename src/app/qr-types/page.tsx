@@ -61,8 +61,8 @@ const ON_SCAN: Record<string, string> = {
   url: "Opens a web page",
   wifi: "Joins the Wi-Fi network",
   vcard: "Saves a contact card",
-  email: "Opens a pre-filled email",
-  sms: "Opens a pre-filled text message",
+  email: "Opens a ready-to-send email",
+  sms: "Opens a ready-to-send text message",
   whatsapp: "Opens a WhatsApp chat",
   pdf: "Opens a PDF document",
   "plain-text": "Shows the text on screen",
@@ -119,9 +119,9 @@ export default function QRTypesIndexPage() {
               Every QR Code Type You Can Create
             </h1>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-              {SITE_NAME} creates 8 kinds of QR codes. Each one encodes a
-              different kind of content and opens a different action on the
-              phone that scans it. Pick a type to open its generator.
+              Choose what you want people to do after they scan. They can open
+              a link, join Wi-Fi, save a contact, start a message, view a PDF,
+              or read text. Select a type to make your code.
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export default function QRTypesIndexPage() {
                 <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-800/60 dark:text-gray-400">
                   <tr>
                     <th scope="col" className="px-6 py-3">Type</th>
-                    <th scope="col" className="px-6 py-3">What happens on scan</th>
+                    <th scope="col" className="px-6 py-3">What happens after a scan</th>
                     <th scope="col" className="px-6 py-3">Works offline</th>
                     <th scope="col" className="px-6 py-3">Tracked mode</th>
                   </tr>
@@ -194,9 +194,8 @@ export default function QRTypesIndexPage() {
               </table>
             </div>
             <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-              Direct QR codes store the content in the image. Tracked QR codes
-              store a short redirect link, which adds scan analytics and lets
-              you change the destination later.{" "}
+              Direct QR codes open the saved information. Tracked QR codes
+              count scans and let you change the link later.{" "}
               <Link href="/#compare-heading" className="text-primary hover:underline">
                 Compare Direct and Tracked
               </Link>

@@ -7,8 +7,8 @@ import type { MetadataRoute } from "next";
 // on every build tells search engines nothing. Bump CONTENT_LAST_MODIFIED in
 // src/lib/seo.ts when public copy changes.
 //
-// Not listed on purpose: /contact (requires sign-in), /pricing (redirects to
-// /support), /sign-in, /sign-up, /dashboard, /r/*.
+// Not listed on purpose: /pricing (redirects to /support), /sign-in, /sign-up,
+// /dashboard, /r/*.
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     {

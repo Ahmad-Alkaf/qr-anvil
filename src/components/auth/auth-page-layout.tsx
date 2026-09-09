@@ -11,13 +11,13 @@ const features = [
   },
   {
     icon: Palette,
-    title: "Full Customization",
-    description: "Colors and dot styles to match your brand",
+    title: "Make It Yours",
+    description: "Choose colors and patterns that match your style",
   },
   {
     icon: BarChart3,
-    title: "Scan Analytics",
-    description: "Track scans with location, device, and time data",
+    title: "See What Gets Scanned",
+    description: "View scan totals, places, devices, and times",
   },
 ];
 
@@ -72,7 +72,7 @@ export function AuthPageLayout({ children }: { children: React.ReactNode }) {
         <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
           <div>
             <p className="mt-4 max-w-sm text-lg font-medium leading-relaxed text-gray-300">
-              Create, customize, and track QR codes.{" "}
+              Make useful QR codes for anything you share.{" "}
               <span className="text-primary-light">Free for everyone.</span>
             </p>
           </div>
@@ -101,7 +101,7 @@ export function AuthPageLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3 text-gray-500">
             <QrCode className="h-4 w-4 text-primary/40" />
             <span className="text-xs tracking-wide">
-              No credit card. No paywalls.
+              No credit card. No hidden fees.
             </span>
           </div>
         </div>
@@ -110,7 +110,7 @@ export function AuthPageLayout({ children }: { children: React.ReactNode }) {
       {/* Right panel: Clerk form */}
       <div className="relative flex flex-1 items-center justify-center bg-gray-950 px-4 py-12 sm:px-8">
         {!loaded && (
-          <div className="absolute flex w-full max-w-[400px] flex-col items-center gap-6">
+          <div className="absolute flex w-full max-w-100 flex-col items-center gap-6">
             <div className="auth-skeleton-pulse h-8 w-32 rounded-lg bg-gray-800/60" />
             <div className="auth-skeleton-pulse h-5 w-56 rounded bg-gray-800/40" />
             <div className="mt-2 w-full space-y-4">

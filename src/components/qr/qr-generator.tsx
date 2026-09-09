@@ -264,7 +264,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                 <Zap className="h-4 w-4" />
                 <div>
                   <div>Direct</div>
-                  <div className="text-xs font-normal opacity-70">Fast, no tracking</div>
+                  <div className="text-xs font-normal opacity-70">Open right away</div>
                 </div>
               </button>
               <button
@@ -306,7 +306,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
           {/* Dot Style */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Dot Style
+              Pattern Style
             </label>
             <div className="grid grid-cols-6 gap-1.5">
               {DOT_STYLES.map(({ value, label, icon: Icon }) => (
@@ -332,7 +332,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Corner Square
+                Outer Corners
               </label>
               <div className="flex gap-1.5">
                 {CORNER_SQUARE_STYLES.map(({ value, label }) => (
@@ -354,7 +354,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Corner Dot
+                Inner Corners
               </label>
               <div className="flex gap-1.5">
                 {CORNER_DOT_STYLES.map(({ value, label }) => (
@@ -383,7 +383,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                 htmlFor="fg-color"
                 className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Foreground
+                Foreground Color
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -407,7 +407,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                 htmlFor="bg-color"
                 className="mb-1.5 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Background
+                Background Color
                 <button
                   type="button"
                   onClick={() => setTransparentBg(!transparentBg)}
@@ -448,7 +448,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
               htmlFor="error-correction"
               className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Error Correction
+              Scan Reliability
             </label>
             <select
               id="error-correction"
@@ -456,15 +456,14 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
               onChange={(e) => setErrorCorrection(e.target.value as ErrorCorrection)}
               className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
             >
-              <option value="L">Low (7%)</option>
-              <option value="M">Medium (15%)</option>
-              <option value="Q">Quartile (25%)</option>
-              <option value="H">High (30%)</option>
+              <option value="L">Basic (7% recovery)</option>
+              <option value="M">Recommended (15% recovery)</option>
+              <option value="Q">Strong (25% recovery)</option>
+              <option value="H">Maximum (30% recovery)</option>
             </select>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              How much of the QR code can be damaged and still scan. Higher
-              levels make the code denser but more resilient. Use High for
-              small prints or if you plan to place a logo on the code.
+              A higher setting helps the code scan if part of it is damaged or
+              covered. Use Maximum for small prints or a code with a logo.
             </p>
           </div>
 
@@ -479,7 +478,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-dark"
               >
                 <LogIn className="h-4 w-4" />
-                Sign in to Create Tracked QR Code
+                Sign in to Create a Tracked QR Code
               </NextLink>
             ) : needsLoginForType ? (
               <NextLink
@@ -495,7 +494,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                   {
                     format: "png" as const,
                     label: "PNG",
-                    sub: "Raster",
+                    sub: "Best for sharing",
                     icon: FileImage,
                     locked: false,
                     bg: "bg-amber-600/20 hover:bg-amber-600/30 dark:bg-amber-500/15 dark:hover:bg-amber-500/25",
@@ -504,7 +503,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                   {
                     format: "svg" as const,
                     label: "SVG",
-                    sub: "Vector",
+                    sub: "Best for design",
                     icon: FileCode2,
                     locked: needsLoginForFormat,
                     bg: "bg-emerald-600/20 hover:bg-emerald-600/30 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25",

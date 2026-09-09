@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/mark";
-import { SITE_NAME, KAFLABS_URL, KAFLABS_PRIVACY_URL, KAFLABS_TERMS_URL } from "@/lib/constants";
+import { SITE_NAME, KAFLABS_URL, KAFLABS_PRIVACY_URL, KAFLABS_TERMS_URL, SUPPORT_EMAIL } from "@/lib/constants";
 
 const footerLinks = {
   "QR Code Types": [
@@ -16,7 +16,6 @@ const footerLinks = {
   ],
   Company: [
     { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
     { href: "/support", label: "Support Me" },
   ],
 };
@@ -40,7 +39,7 @@ export function Footer() {
               <Logo size="sm" />
             </Link>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-              Create, customize, and track QR codes. Free for everyone.
+              Make useful QR codes for links, Wi-Fi, contacts, messages, and more.
             </p>
             <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
               A{" "}
@@ -70,6 +69,13 @@ export function Footer() {
                     </Link>
                   </li>
                 ))}
+                {category === "Company" && (
+                  <li>
+                    <a href={`mailto:${SUPPORT_EMAIL}`} className={linkClass}>
+                      Email support
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
           ))}

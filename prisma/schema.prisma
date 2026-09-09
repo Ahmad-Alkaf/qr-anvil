@@ -16,7 +16,6 @@ model User {
   image   String?
   qrCodes         QRCode[]
   scans           Scan[]
-  contactMessages ContactMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,22 +105,5 @@ model QRGenEvent {
 
   createdAt DateTime @default(now())
 
-  @@index([createdAt])
-}
-
-// ─── Contact Messages ─────────────────────────────────
-model ContactMessage {
-  id      String @id @default(cuid())
-  userId  String
-  name    String
-  email   String
-  subject String
-  message String @db.Text
-
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
   @@index([createdAt])
 }
