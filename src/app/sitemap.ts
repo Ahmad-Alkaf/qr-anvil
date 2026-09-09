@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/constants";
+import { GUIDE_SLUGS, GUIDES_LAST_MODIFIED } from "@/lib/guide-content";
 import { QR_TYPE_SLUGS } from "@/lib/qr-type-content";
 import { CONTENT_LAST_MODIFIED } from "@/lib/seo";
 import type { MetadataRoute } from "next";
@@ -22,6 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: CONTENT_LAST_MODIFIED,
       changeFrequency: "monthly",
       priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/guides`,
+      lastModified: GUIDES_LAST_MODIFIED,
+      changeFrequency: "monthly",
+      priority: 0.8,
     },
     {
       url: `${SITE_URL}/support`,
@@ -56,5 +63,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  return [...staticPages, ...qrTypePages];
+  const guidePages: MetadataRoute.Sitemap = GUIDE_SLUGS.map((slug) => ({
+    url: `${SITE_URL}/guides/${slug}`,
+    lastModified: GUIDES_LAST_MODIFIED,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...qrTypePages, ...guidePages];
 }

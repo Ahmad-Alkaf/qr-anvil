@@ -14,6 +14,19 @@ const footerLinks = {
     { href: "/qr-types/pdf", label: "PDF QR Code" },
     { href: "/qr-types/plain-text", label: "Plain Text QR Code" },
   ],
+  Guides: [
+    { href: "/guides", label: "All guides" },
+    { href: "/guides/how-to-create-a-qr-code", label: "Create a QR code" },
+    { href: "/guides/how-to-scan-a-qr-code", label: "Scan a QR code" },
+    {
+      href: "/guides/connect-to-wifi-with-qr-code-windows",
+      label: "Windows Wi-Fi QR code",
+    },
+    {
+      href: "/guides/direct-vs-tracked-qr-codes",
+      label: "Direct vs Tracked",
+    },
+  ],
   Company: [
     { href: "/about", label: "About" },
     { href: "/support", label: "Support Me" },
@@ -32,7 +45,7 @@ export function Footer() {
   return (
     <footer className="border-t border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" aria-label={`${SITE_NAME} home`} className="inline-flex">
