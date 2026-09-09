@@ -237,17 +237,17 @@ export default async function HomePage() {
 						<h1
 							id="hero-heading"
 							className="font-heading text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl dark:text-white">
-							Make a QR Code for Anything You Share
+							Free QR Code Generator
 							<br />
 							<span className="text-primary">
-								Free and Ready in Seconds
+								Custom and Ready in Seconds
 							</span>
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-							Turn a link, Wi-Fi password, contact card, message,
-							or PDF into a QR code. Make it match your style,
-							download it, and share it. Need results? Use a
-							Tracked code to count scans and update the link later.
+							Create a custom QR code for a link, Wi-Fi password,
+							contact card, message, or PDF. Choose a style,
+							download it, and share it. Use a Tracked code to
+							count scans and update the link later.
 						</p>
 					</div>
 

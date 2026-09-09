@@ -27,7 +27,7 @@ const fraunces = Fraunces({
 	display: 'swap'
 });
 
-const DEFAULT_TITLE = `Free QR Code Generator — Create Custom QR Codes Instantly | ${SITE_NAME}`;
+const DEFAULT_TITLE = `Free QR Code Generator | ${SITE_NAME}`;
 
 // Optional. Set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION at build time to prove
 // ownership in Google Search Console without a DNS record.
