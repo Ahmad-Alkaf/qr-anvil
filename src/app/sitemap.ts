@@ -31,6 +31,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}/qr-code-scanner`,
+      lastModified: CONTENT_LAST_MODIFIED,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${SITE_URL}/support`,
       lastModified: CONTENT_LAST_MODIFIED,
       changeFrequency: "monthly",

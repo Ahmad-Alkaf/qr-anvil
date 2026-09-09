@@ -391,9 +391,9 @@ export const GUIDE_PAGES: Record<string, GuideDefinition> = {
       },
     ],
     primaryLink: {
-      href: "/#generator",
-      label: "Create a test QR code",
-      description: "Make a QR code, then use these steps to test it.",
+      href: "/qr-code-scanner",
+      label: "Scan a QR code online",
+      description: "Use your camera or upload an image to read a QR code.",
     },
     relatedSlugs: [
       "how-to-scan-a-qr-code-on-android",
@@ -498,9 +498,9 @@ export const GUIDE_PAGES: Record<string, GuideDefinition> = {
       },
     ],
     primaryLink: {
-      href: "/#generator",
-      label: "Create a QR code to test",
-      description: "Make a code and test it with your Android device.",
+      href: "/qr-code-scanner",
+      label: "Open the QR code scanner",
+      description: "Use the browser scanner with your camera or an image.",
     },
     relatedSlugs: [
       "how-to-scan-a-qr-code",
@@ -599,9 +599,9 @@ export const GUIDE_PAGES: Record<string, GuideDefinition> = {
       },
     ],
     primaryLink: {
-      href: "/guides/connect-to-wifi-with-qr-code-windows",
-      label: "Connect to Wi-Fi with a QR code",
-      description: "Read the full Windows Wi-Fi scan and sharing guide.",
+      href: "/qr-code-scanner",
+      label: "Open the QR code scanner",
+      description: "Scan with your camera or upload a QR code image.",
     },
     relatedSlugs: [
       "connect-to-wifi-with-qr-code-windows",

@@ -10,6 +10,7 @@ import {Logo} from '@/components/brand/mark';
 
 const navLinks = [
 	{href: '/qr-types', label: 'QR Types'},
+	{href: '/qr-code-scanner', label: 'Scanner'},
 	{href: '/guides', label: 'Guides'},
 	{href: '/support', label: 'Support Me'},
 	{href: '/about', label: 'About'}

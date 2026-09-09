@@ -16,6 +16,7 @@ const footerLinks = {
   ],
   Guides: [
     { href: "/guides", label: "All guides" },
+    { href: "/qr-code-scanner", label: "QR code scanner" },
     { href: "/guides/how-to-create-a-qr-code", label: "Create a QR code" },
     { href: "/guides/how-to-scan-a-qr-code", label: "Scan a QR code" },
     {
