@@ -38,25 +38,27 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     slug: "url",
     qrType: "URL",
     label: "URL",
-    title: "URL QR Code Generator — Create Link QR Codes Free",
+    title: "URL QR Code Generator — Turn a Link into a QR Code",
     h1: "URL QR Code Generator",
     description:
-      "Create free QR codes that link to any website or URL. Customize colors, choose Direct or Tracked mode, and download as PNG, SVG, or PDF.",
+      "Turn a link into a free QR code. Add any website URL, customize the design, choose Direct or Tracked mode, and download the finished code.",
     keywords: [
       "URL QR code generator",
+      "link to QR code",
+      "URL to QR code",
       "QR code for website",
       "link QR code",
-      "QR code for link free",
+      "QR code for a link",
       "website QR code",
     ],
     definition:
       "A URL QR code is a QR code that opens a web address when it is scanned with a phone camera.",
     content:
-      "URL QR codes are the most popular type of QR code. Paste any web address and QR Anvil creates a scannable QR code that opens the link when scanned. Choose Direct mode for instant access with no redirect, or Tracked mode to count scans, see where and on which devices they happen, and change the destination after the code is printed.",
+      "Paste a complete web address to turn the link into a QR code. A Direct code stores the URL in the image and opens it without a QR Anvil redirect. A Tracked code uses a short redirect so you can see scan totals and change the destination after you print the code. Test the final code on a phone before you publish it.",
     useCases: [
       "Posters, flyers, and business cards that link to a website",
       "Product packaging that opens a product page or manual",
-      "Social media profiles, YouTube videos, and app store listings",
+      "Social profiles, videos, and app store listings",
       "Google Forms, surveys, and event registration pages",
     ],
     steps: [
@@ -66,8 +68,12 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     ],
     faqs: [
       {
-        q: "Can I create a QR code for any URL?",
-        a: "Yes. You can create a QR code for any valid URL: websites, social media profiles, YouTube videos, Google Forms, app download links, and more.",
+        q: "How do I turn a link into a QR code?",
+        a: "Paste the complete URL into the generator, select Direct or Tracked mode, and download the code. Scan the downloaded code to make sure that it opens the correct link.",
+      },
+      {
+        q: "Can I create a QR code for any public URL?",
+        a: "Yes. You can use a valid public HTTP or HTTPS address for a website, social profile, video, form, file, or app listing. People still need the required permission to open a restricted page.",
       },
       {
         q: "What is the difference between Direct and Tracked URL QR codes?",
@@ -83,10 +89,10 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     slug: "wifi",
     qrType: "WIFI",
     label: "Wi-Fi",
-    title: "Wi-Fi QR Code Generator — Share Network Access Instantly",
+    title: "Wi-Fi QR Code Generator — Share Network Access",
     h1: "Wi-Fi QR Code Generator",
     description:
-      "Create a QR code for your Wi-Fi network. Guests scan to connect automatically without typing a password. Works with WPA, WPA2, and WEP.",
+      "Create a Wi-Fi QR code for guests. Add the network name, password, and security type so compatible devices can connect without manual entry.",
     keywords: [
       "Wi-Fi QR code generator",
       "WiFi QR code",
@@ -97,26 +103,26 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "A Wi-Fi QR code is a QR code that stores a network name, password, and security type so a phone can join the network by scanning it.",
     content:
-      "Wi-Fi QR codes let guests connect to your network by scanning a code instead of typing a long password. They are ideal for restaurants, hotels, offices, Airbnb rentals, and home networks. The QR code encodes the network name (SSID), the password, and the encryption type using the standard WIFI: format that iOS and Android understand natively. Wi-Fi QR codes use Direct mode because the credentials are stored in the image itself and do not need a redirect.",
+      "A Wi-Fi QR code gives a compatible device the network name (SSID), password, security type, and hidden-network setting. It uses Direct mode because these details are in the QR image and do not need a redirect. Use a separate guest network when possible, and replace the printed code after you change the password. For computer steps, read How to Connect to Wi-Fi with a QR Code on Windows in the Guides section.",
     useCases: [
-      "Table cards and menus in cafés and restaurants",
+      "Table cards and menus in cafes and restaurants",
       "Guest rooms in hotels and short-term rentals",
       "Office reception desks and meeting rooms",
       "Home networks for visitors and family",
     ],
     steps: [
       "Enter the network name (SSID) exactly as it appears in your Wi-Fi settings.",
-      "Enter the password and select the security type: WPA/WPA2, WEP, or none for open networks.",
-      "Customize the design, download the QR code, and print it where guests can scan it.",
+      "Enter the password, select the correct security type, and mark the network as hidden when required.",
+      "Customize and download the code. Test it on a device that is not connected, then put it where approved guests can scan it.",
     ],
     faqs: [
       {
         q: "Is it safe to share my Wi-Fi password with a QR code?",
-        a: "The password is stored in the QR code image itself and never sent to QR Anvil. Only people who can scan the physical QR code get access. For extra safety, create a separate guest network and make a QR code for that network.",
+        a: "A QR code does not hide or encrypt the password. A person with a QR reader can extract it. Use a separate guest network, control access to the code, and change the password if the code is copied.",
       },
       {
         q: "Does a Wi-Fi QR code work on both iPhone and Android?",
-        a: "Yes. iOS 11 and later and all modern Android versions can read Wi-Fi QR codes with the built-in camera app and offer to join the network.",
+        a: "Many current iPhone and Android devices can read Wi-Fi QR codes and offer to join the network. Support and the scan steps can differ by device, operating system, and camera app.",
       },
       {
         q: "Can I change the password after I print the Wi-Fi QR code?",
@@ -131,7 +137,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     title: "vCard QR Code Generator — Digital Business Card QR Code",
     h1: "vCard QR Code Generator",
     description:
-      "Create a QR code that shares your contact details. Recipients scan to save your name, phone, email, company, and website to their phone contacts.",
+      "Create a digital business card QR code with your contact details. People can scan it and save the supported fields to their phone contacts.",
     keywords: [
       "vCard QR code generator",
       "contact QR code",
@@ -142,7 +148,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "A vCard QR code is a QR code that contains a contact card in the vCard format, so a phone can save the contact when it scans the code.",
     content:
-      "vCard QR codes encode contact information in the standard vCard 3.0 format. When someone scans the code, the details appear as a contact card that can be saved to their phone address book in one tap. Include your name, phone number, email, company, job title, website, and address. vCard QR codes are common on business cards, name badges, email signatures, and conference slides.",
+      "A vCard QR code stores contact information in vCard 3.0 format. A phone can show the details as a contact card that the person can review and save. Add only the fields that you want to share, such as a name, phone number, email, company, job title, website, and address. Field display can differ between scanner and contacts apps.",
     useCases: [
       "Printed business cards and name badges",
       "Email signatures and presentation closing slides",
@@ -151,8 +157,8 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     ],
     steps: [
       "Fill in the contact fields you want to share: name, phone, email, company, title, website, and address.",
-      "Keep the QR code in Direct mode so the contact card is saved instantly, even offline.",
-      "Choose a high error correction level if you plan to print the code small, then download it.",
+      "Check each detail and remove private information that you do not want to publish.",
+      "Customize and download the code, then test the saved contact on more than one phone before you print it.",
     ],
     faqs: [
       {
@@ -165,7 +171,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
       },
       {
         q: "Does a vCard QR code work without an internet connection?",
-        a: "Yes. The contact card is encoded in the image, so the phone can read and save it offline.",
+        a: "The contact data is in the QR image, so a compatible scanner can read it without an internet connection. The phone controls how it displays and saves the fields.",
       },
     ],
   },
@@ -186,7 +192,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "An email QR code is a QR code that opens the phone's email app with the recipient address, subject, and message already filled in.",
     content:
-      "Email QR codes make it simple for people to contact you. When scanned, the code opens the default email app with the recipient address, subject line, and message body pre-filled. The person only needs to tap send. Email QR codes use the standard mailto: link format, so they work with Gmail, Outlook, Apple Mail, and every other email client.",
+      "Email QR codes use a mailto link to prepare an email with a recipient address and optional subject and message. A supported scanner opens the email app that the device assigns to mail links. The person must review and send the message. Behavior can differ by device and email app.",
     useCases: [
       "Customer feedback requests on receipts and packaging",
       "Support contact points on product manuals",
@@ -201,11 +207,11 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     faqs: [
       {
         q: "Can I pre-fill the email subject and body?",
-        a: "Yes. You can set the recipient address, the subject line, and the message body. The person scanning the code only needs to tap send.",
+        a: "Yes. You can set the recipient address, subject, and message. The person who scans the code can review and change the email before they send it.",
       },
       {
         q: "Which email apps are supported?",
-        a: "Email QR codes use the standard mailto: protocol, which works with any email client, including Gmail, Outlook, Apple Mail, and Yahoo Mail.",
+        a: "The code uses a standard mailto link. It can open the app that the device assigns to email links, but support and pre-filled fields can differ by app.",
       },
     ],
   },
@@ -226,7 +232,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "An SMS QR code is a QR code that opens the phone's messaging app with a phone number and an optional message already filled in.",
     content:
-      "SMS QR codes open the messaging app with a phone number and an optional message pre-filled. They are useful for text-to-join campaigns, customer support shortcuts, appointment confirmations, and RSVP systems. The person only needs to tap send after scanning. SMS QR codes use the standard smsto: format that iOS and Android both support.",
+      "SMS QR codes use an smsto link to prepare a text message with a phone number and optional message. They are useful for text-to-join campaigns, support, appointment confirmations, and replies. The person must review and send the message. Scanner and messaging app support can differ by device.",
     useCases: [
       "Text-to-join marketing lists on posters and packaging",
       "Support lines printed on invoices and delivery notes",
@@ -245,7 +251,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
       },
       {
         q: "Does an SMS QR code work internationally?",
-        a: "Yes. Use the international format with the country code, for example +1 for the United States or +44 for the United Kingdom, so the number works from any country.",
+        a: "Use the full international number with its country code. Delivery still depends on the sender's mobile plan, network, destination number, and local service rules.",
       },
     ],
   },
@@ -253,10 +259,10 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     slug: "whatsapp",
     qrType: "WHATSAPP",
     label: "WhatsApp",
-    title: "WhatsApp QR Code Generator — Open WhatsApp Chats Instantly",
+    title: "WhatsApp QR Code Generator — Create a Chat QR Code",
     h1: "WhatsApp QR Code Generator",
     description:
-      "Create a QR code that opens a WhatsApp chat with your number and a pre-filled message. Useful for customer support, orders, and marketing.",
+      "Create a QR code for your WhatsApp number. A scan opens a chat and can add a pre-filled message for support, orders, or bookings.",
     keywords: [
       "WhatsApp QR code generator",
       "QR code for WhatsApp number",
@@ -266,7 +272,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "A WhatsApp QR code is a QR code that opens a WhatsApp chat with a specific phone number, optionally with a pre-written message.",
     content:
-      "WhatsApp QR codes let people start a conversation with you on WhatsApp instantly. The QR code encodes a wa.me click-to-chat link with your phone number and an optional pre-filled message. They are ideal for businesses that use WhatsApp for customer support, order inquiries, and appointment booking. WhatsApp QR codes work with both regular WhatsApp and WhatsApp Business accounts.",
+      "A WhatsApp QR code stores a wa.me click-to-chat link for your phone number and an optional message. When a person scans it, WhatsApp can open the correct chat. The person can review the message before they send it. Use this code for customer questions, order requests, and appointment bookings with a regular or WhatsApp Business number.",
     useCases: [
       "Customer support contact on websites and packaging",
       "Order and reservation requests for restaurants and shops",
@@ -276,7 +282,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     steps: [
       "Enter your WhatsApp phone number with the country code.",
       "Add an optional message so the customer only needs to tap send.",
-      "Download the QR code and share it in print or online.",
+      "Download the QR code, test it with another WhatsApp account, and then share it in print or online.",
     ],
     faqs: [
       {
@@ -287,6 +293,10 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
         q: "What phone number format should I use?",
         a: "Include your country code, for example +1 for the United States or +44 for the United Kingdom. Dashes and spaces are removed automatically.",
       },
+      {
+        q: "Does the QR code send the WhatsApp message automatically?",
+        a: "No. It opens a chat with the optional message ready for review. The person who scans the code must select Send.",
+      },
     ],
   },
   pdf: {
@@ -296,7 +306,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     title: "PDF QR Code Generator — Link to PDF Documents",
     h1: "PDF QR Code Generator",
     description:
-      "Create a QR code that opens a PDF document. Ideal for restaurant menus, brochures, manuals, and event programs. Track views with Tracked mode.",
+      "Create a QR code for a PDF link. Use it for menus, brochures, manuals, or event files, and select Tracked mode if the destination can change.",
     keywords: [
       "PDF QR code generator",
       "QR code for PDF",
@@ -306,26 +316,30 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "A PDF QR code is a QR code that opens a PDF document hosted online when it is scanned.",
     content:
-      "PDF QR codes link to a PDF document hosted online. When scanned, the PDF opens in the phone's browser or PDF viewer. Upload the PDF to any hosting service, paste the link, and QR Anvil creates the code. PDF QR codes are common for restaurant menus, event programs, product manuals, and digital brochures. Use Tracked mode to count how many people open the document and to swap the file later without reprinting.",
+      "QR Anvil does not upload or store the PDF file. First, host it at a stable public HTTPS address that opens without an account or access request. Then paste that address into the generator. A Direct code stores the PDF URL. A Tracked code lets you change its destination to a replacement PDF without reprinting the code and records QR Anvil scan totals.",
     useCases: [
-      "Contactless restaurant and café menus",
+      "Restaurant and cafe menus",
       "Product manuals and safety data sheets on packaging",
       "Event programs, schedules, and floor plans",
       "Brochures and price lists for real estate and retail",
     ],
     steps: [
-      "Upload the PDF to a hosting service such as Google Drive, Dropbox, or your own website and copy the public link.",
-      "Paste the link into the PDF field and choose Tracked mode if you want view counts and the ability to replace the file later.",
-      "Download the QR code and print it on the menu, package, or brochure.",
+      "Host the PDF at a stable public HTTPS address. Open the link in a private browser window to check that it does not ask for a sign-in.",
+      "Paste the public link into the PDF field. Select Tracked mode if you want scan totals or need to change the destination later.",
+      "Download and scan the final code on a phone. Confirm that the correct PDF opens before you print it.",
     ],
     faqs: [
       {
         q: "Where should I host my PDF file?",
-        a: "You can host the PDF on any service that gives a public link: Google Drive with sharing enabled, Dropbox, OneDrive, your own website, or any cloud storage with a direct link.",
+        a: "Use your website or a file service that gives a stable public HTTPS link. Check the link in a private browser window. It must open for a person who does not have your account or file permission.",
       },
       {
         q: "Can I update the PDF without changing the QR code?",
-        a: "Yes, if you use a Tracked QR code. You can change the destination URL to a new PDF at any time, and the printed QR code keeps working.",
+        a: "Yes, if you use a Tracked QR code and keep that code in your dashboard. Change its destination to the public URL of the replacement PDF. The printed QR pattern stays the same.",
+      },
+      {
+        q: "Does QR Anvil upload my PDF?",
+        a: "No. QR Anvil creates a QR code for the public PDF URL that you enter. You must host the PDF and manage its access settings.",
       },
     ],
   },
@@ -346,7 +360,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     definition:
       "A plain text QR code is a QR code that displays a piece of text when it is scanned, with no link and no internet connection required.",
     content:
-      "Plain text QR codes encode any text. When scanned, the text appears directly on the phone screen. Use them for short messages, coupon codes, serial numbers, asset tags, instructions, or any text that does not need to be a link. Because the text is stored in the image itself, the code can be read fully offline.",
+      "A plain text QR code stores text instead of a web link. A compatible scanner can show the text without an internet connection. Use it for a short note, coupon code, serial number, asset tag, or instruction. Short text makes a less dense code that is usually easier to scan.",
     useCases: [
       "Serial numbers and asset tags for inventory",
       "Coupon and voucher codes",
@@ -361,7 +375,7 @@ export const QR_TYPE_PAGES: Record<string, QRTypePage> = {
     faqs: [
       {
         q: "How much text can a plain text QR code hold?",
-        a: "A QR code can hold up to 4,296 alphanumeric characters. Shorter text produces a simpler, more reliable QR code. Keep it under 300 characters for the best scan results.",
+        a: "Capacity depends on the characters and error correction level. Long text makes a denser code that can be harder to scan. Use a URL when you need to share a long document.",
       },
       {
         q: "Does scanning a plain text QR code require an internet connection?",
