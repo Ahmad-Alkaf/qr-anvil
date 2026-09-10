@@ -8,14 +8,14 @@
 # On start the container runs `prisma migrate deploy` and then the server.
 
 # ---------- deps ----------
-FROM node:22-alpine AS deps
+FROM node:24-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 # ---------- builder ----------
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -44,7 +44,7 @@ RUN npm run build
 # ---------- migrator ----------
 # A small, self-contained copy of the Prisma CLI so the runtime image can
 # apply migrations without the full node_modules of the app.
-FROM node:22-alpine AS migrator
+FROM node:24-alpine AS migrator
 RUN apk add --no-cache libc6-compat
 WORKDIR /migrate
 COPY prisma ./prisma
@@ -53,7 +53,7 @@ RUN npm init -y >/dev/null \
     && npm install --no-audit --no-fund --omit=dev prisma@7.5.0 dotenv@16
 
 # ---------- runner ----------
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NODE_ENV=production \
