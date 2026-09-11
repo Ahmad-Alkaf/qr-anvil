@@ -9,7 +9,7 @@ import type { QRTypeFaq } from "@/lib/qr-type-content";
  */
 
 /** Date the public copy last changed. Update it when the wording changes. */
-export const CONTENT_LAST_MODIFIED = new Date("2026-09-07");
+export const CONTENT_LAST_MODIFIED = new Date("2026-09-09");
 
 export const SITE_TAGLINE = "Free QR Codes Made Simple";
 
@@ -23,9 +23,10 @@ export const FEATURE_LIST = [
   "Tracked QR codes with scan analytics and editable destination URL",
   "Custom foreground and background colors",
   "Dot, corner square, and corner dot styles",
+  "Optional center logo with automatic image resizing and high error correction",
   "Error correction levels L, M, Q, and H",
   "PNG, SVG, and PDF downloads",
-  "Client-side generation so QR content stays in the browser",
+  "Client-side image generation, with saved designs for signed-in users",
   "Free to use, no watermark",
 ];
 

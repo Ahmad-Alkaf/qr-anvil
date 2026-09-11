@@ -35,19 +35,36 @@ export type QRDotType = (typeof DOT_TYPES)[number];
 export type QRCornerSquareType = (typeof CORNER_SQUARE_TYPES)[number];
 export type QRCornerDotType = (typeof CORNER_DOT_TYPES)[number];
 
+export const LOGO_SIZE_MIN = 0.1;
+export const LOGO_SIZE_MAX = 0.7;
+export const DEFAULT_LOGO_SIZE = 0.5;
+export const LOGO_MARGIN_MIN = 0;
+export const LOGO_MARGIN_MAX = 0.04;
+export const DEFAULT_LOGO_MARGIN = 0.01;
+export const LOGO_OVERSCAN_MIN = 0;
+export const LOGO_OVERSCAN_MAX = 0.5;
+export const DEFAULT_LOGO_OVERSCAN = 0;
+
 export interface QRStyle {
   dotType: QRDotType;
   cornerSquareType: QRCornerSquareType;
   cornerDotType: QRCornerDotType;
+  logoSize: number;
+  logoMargin: number;
+  logoOverscan: number;
 }
 
 export const DEFAULT_STYLE: QRStyle = {
   dotType: "square",
   cornerSquareType: "square",
   cornerDotType: "square",
+  logoSize: DEFAULT_LOGO_SIZE,
+  logoMargin: DEFAULT_LOGO_MARGIN,
+  logoOverscan: DEFAULT_LOGO_OVERSCAN,
 };
 
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
+const LOGO_DATA_URL = /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
 
 export const qrGenerateSchema = z.object({
   type: z.enum(QR_TYPES),
@@ -61,6 +78,27 @@ export const qrGenerateSchema = z.object({
   dotType: z.enum(DOT_TYPES).default("square"),
   cornerSquareType: z.enum(CORNER_SQUARE_TYPES).default("square"),
   cornerDotType: z.enum(CORNER_DOT_TYPES).default("square"),
+  logoSize: z
+    .number()
+    .min(LOGO_SIZE_MIN)
+    .max(LOGO_SIZE_MAX)
+    .default(DEFAULT_LOGO_SIZE),
+  logoMargin: z
+    .number()
+    .min(LOGO_MARGIN_MIN)
+    .max(LOGO_MARGIN_MAX)
+    .default(DEFAULT_LOGO_MARGIN),
+  logoOverscan: z
+    .number()
+    .min(LOGO_OVERSCAN_MIN)
+    .max(LOGO_OVERSCAN_MAX)
+    .default(DEFAULT_LOGO_OVERSCAN),
+  logoUrl: z
+    .string()
+    .max(750_000)
+    .regex(LOGO_DATA_URL, "Logo must be a PNG, JPG, or WebP image")
+    .nullable()
+    .default(null),
   // Direct: content encoded directly in QR (fast, no analytics)
   // Tracked: QR points to redirect URL (enables analytics + editable destination)
   isDirect: z.boolean().default(true),
@@ -68,17 +106,45 @@ export const qrGenerateSchema = z.object({
 
 export type QRGenerateInput = z.infer<typeof qrGenerateSchema>;
 
-/** Serialize the shape options into the single `style` column. */
+/** Serialize the visual options into the single `style` column. */
 export function serializeStyle(style: QRStyle): string {
-  return `${style.dotType}/${style.cornerSquareType}/${style.cornerDotType}`;
+  return `${style.dotType}/${style.cornerSquareType}/${style.cornerDotType}/${style.logoSize}/${style.logoMargin}/${style.logoOverscan}`;
 }
 
-/** Parse the `style` column. Unknown or legacy values fall back to squares. */
+/** Parse the `style` column. Unknown or legacy values use safe defaults. */
 export function parseStyle(value: string | null | undefined): QRStyle {
   if (!value) return DEFAULT_STYLE;
-  const [dot, cornerSquare, cornerDot] = value.split("/");
+  const [
+    dot,
+    cornerSquare,
+    cornerDot,
+    logoSizeValue,
+    logoMarginValue,
+    logoOverscanValue,
+  ] = value.split("/");
   const has = (list: readonly string[], v: string | undefined) =>
     v !== undefined && list.includes(v);
+  const parsedLogoSize = Number(logoSizeValue);
+  const logoSize =
+    Number.isFinite(parsedLogoSize) &&
+    parsedLogoSize >= LOGO_SIZE_MIN &&
+    parsedLogoSize <= LOGO_SIZE_MAX
+      ? parsedLogoSize
+      : DEFAULT_LOGO_SIZE;
+  const parsedLogoMargin = Number(logoMarginValue);
+  const logoMargin =
+    Number.isFinite(parsedLogoMargin) &&
+    parsedLogoMargin >= LOGO_MARGIN_MIN &&
+    parsedLogoMargin <= LOGO_MARGIN_MAX
+      ? parsedLogoMargin
+      : DEFAULT_LOGO_MARGIN;
+  const parsedLogoOverscan = Number(logoOverscanValue);
+  const logoOverscan =
+    Number.isFinite(parsedLogoOverscan) &&
+    parsedLogoOverscan >= LOGO_OVERSCAN_MIN &&
+    parsedLogoOverscan <= LOGO_OVERSCAN_MAX
+      ? parsedLogoOverscan
+      : DEFAULT_LOGO_OVERSCAN;
   return {
     dotType: has(DOT_TYPES, dot) ? (dot as QRDotType) : "square",
     cornerSquareType: has(CORNER_SQUARE_TYPES, cornerSquare)
@@ -87,6 +153,9 @@ export function parseStyle(value: string | null | undefined): QRStyle {
     cornerDotType: has(CORNER_DOT_TYPES, cornerDot)
       ? (cornerDot as QRCornerDotType)
       : "square",
+    logoSize,
+    logoMargin,
+    logoOverscan,
   };
 }
 

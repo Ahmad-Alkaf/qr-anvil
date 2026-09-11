@@ -112,6 +112,7 @@ export default async function QRCodeDetailPage({
         bgColor={qrCode.backgroundColor}
         errorCorrection={errorCorrection}
         style={style}
+        logoImage={qrCode.logoUrl}
       />
 
       {qrCode.isDirect ? (

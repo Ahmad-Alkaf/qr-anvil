@@ -22,6 +22,10 @@ describe("qrGenerateSchema", () => {
       dotType: "square",
       cornerSquareType: "square",
       cornerDotType: "square",
+      logoSize: 0.5,
+      logoMargin: 0.01,
+      logoOverscan: 0,
+      logoUrl: null,
       isDirect: true,
     });
   });
@@ -85,6 +89,47 @@ describe("qrGenerateSchema", () => {
     expect(qrGenerateSchema.safeParse({ ...base, isDirect: false }).success).toBe(true);
     expect(qrGenerateSchema.safeParse({ ...base, isDirect: "false" }).success).toBe(false);
   });
+
+  it("accepts safe logo data and rejects unsupported logo values", () => {
+    const base = { type: "URL", content: "x" };
+    expect(
+      qrGenerateSchema.safeParse({
+        ...base,
+        logoUrl: "data:image/webp;base64,UklGRg==",
+      }).success
+    ).toBe(true);
+    expect(
+      qrGenerateSchema.safeParse({
+        ...base,
+        logoUrl: "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=",
+      }).success
+    ).toBe(false);
+    expect(qrGenerateSchema.safeParse({ ...base, logoUrl: "https://example.com/logo.png" }).success).toBe(false);
+  });
+
+  it("limits the logo size to 10..70 percent", () => {
+    const base = { type: "URL", content: "x" };
+    expect(qrGenerateSchema.safeParse({ ...base, logoSize: 0.1 }).success).toBe(true);
+    expect(qrGenerateSchema.safeParse({ ...base, logoSize: 0.7 }).success).toBe(true);
+    expect(qrGenerateSchema.safeParse({ ...base, logoSize: 0.09 }).success).toBe(false);
+    expect(qrGenerateSchema.safeParse({ ...base, logoSize: 0.71 }).success).toBe(false);
+  });
+
+  it("limits the logo margin to 0..4 percent of the QR width", () => {
+    const base = { type: "URL", content: "x" };
+    expect(qrGenerateSchema.safeParse({ ...base, logoMargin: 0 }).success).toBe(true);
+    expect(qrGenerateSchema.safeParse({ ...base, logoMargin: 0.04 }).success).toBe(true);
+    expect(qrGenerateSchema.safeParse({ ...base, logoMargin: -0.005 }).success).toBe(false);
+    expect(qrGenerateSchema.safeParse({ ...base, logoMargin: 0.045 }).success).toBe(false);
+  });
+
+  it("limits logo zoom to 0..50 percent", () => {
+    const base = { type: "URL", content: "x" };
+    expect(qrGenerateSchema.safeParse({ ...base, logoOverscan: 0 }).success).toBe(true);
+    expect(qrGenerateSchema.safeParse({ ...base, logoOverscan: 0.5 }).success).toBe(true);
+    expect(qrGenerateSchema.safeParse({ ...base, logoOverscan: -0.01 }).success).toBe(false);
+    expect(qrGenerateSchema.safeParse({ ...base, logoOverscan: 0.51 }).success).toBe(false);
+  });
 });
 
 describe("TRACKABLE_TYPES", () => {
@@ -95,8 +140,15 @@ describe("TRACKABLE_TYPES", () => {
 
 describe("serializeStyle / parseStyle", () => {
   it("round-trips every combination", () => {
-    const style = { dotType: "classy", cornerSquareType: "dot", cornerDotType: "dot" } as const;
-    expect(serializeStyle(style)).toBe("classy/dot/dot");
+    const style = {
+      dotType: "classy",
+      cornerSquareType: "dot",
+      cornerDotType: "dot",
+      logoSize: 0.58,
+      logoMargin: 0.025,
+      logoOverscan: 0.12,
+    } as const;
+    expect(serializeStyle(style)).toBe("classy/dot/dot/0.58/0.025/0.12");
     expect(parseStyle(serializeStyle(style))).toEqual(style);
   });
 
@@ -109,14 +161,41 @@ describe("serializeStyle / parseStyle", () => {
   });
 
   it("keeps the valid parts of a partial value", () => {
-    expect(parseStyle("dots")).toEqual({ dotType: "dots", cornerSquareType: "square", cornerDotType: "square" });
+    expect(parseStyle("dots")).toEqual({
+      dotType: "dots",
+      cornerSquareType: "square",
+      cornerDotType: "square",
+      logoSize: 0.5,
+      logoMargin: 0.01,
+      logoOverscan: 0,
+    });
     expect(parseStyle("rounded/extra-rounded")).toEqual({
       dotType: "rounded",
       cornerSquareType: "extra-rounded",
       cornerDotType: "square",
+      logoSize: 0.5,
+      logoMargin: 0.01,
+      logoOverscan: 0,
     });
     // A dot-type value in the corner slot is not valid there.
     expect(parseStyle("square/dots/dots")).toEqual(DEFAULT_STYLE);
+  });
+
+  it("uses the default for an unsafe saved logo size", () => {
+    expect(parseStyle("dots/dot/dot/0.9").logoSize).toBe(0.5);
+    expect(parseStyle("dots/dot/dot/not-a-number").logoSize).toBe(0.5);
+  });
+
+  it("uses the default for a missing or unsafe saved logo margin", () => {
+    expect(parseStyle("dots/dot/dot/0.5").logoMargin).toBe(0.01);
+    expect(parseStyle("dots/dot/dot/0.5/0.2").logoMargin).toBe(0.01);
+    expect(parseStyle("dots/dot/dot/0.5/not-a-number").logoMargin).toBe(0.01);
+  });
+
+  it("uses zero for a missing or unsafe saved logo zoom", () => {
+    expect(parseStyle("dots/dot/dot/0.5/0.01").logoOverscan).toBe(0);
+    expect(parseStyle("dots/dot/dot/0.5/0.01/0.6").logoOverscan).toBe(0);
+    expect(parseStyle("dots/dot/dot/0.5/0.01/not-a-number").logoOverscan).toBe(0);
   });
 });
 

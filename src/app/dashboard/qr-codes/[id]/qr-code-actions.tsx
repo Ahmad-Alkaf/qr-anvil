@@ -23,6 +23,7 @@ interface QRCodeActionsProps {
   bgColor: string;
   errorCorrection: ErrorCorrection;
   style: QRStyle;
+  logoImage: string | null;
 }
 
 const FORMATS: { format: DownloadFormat; label: string }[] = [
@@ -58,6 +59,10 @@ export function QRCodeActions(props: QRCodeActionsProps) {
         dotType: props.style.dotType,
         cornerSquareType: props.style.cornerSquareType,
         cornerDotType: props.style.cornerDotType,
+        logoImage: props.logoImage,
+        logoSize: props.style.logoSize,
+        logoMargin: props.style.logoMargin,
+        logoOverscan: props.style.logoOverscan,
       });
       downloadBlob(blob, `qr-anvil-${props.type.toLowerCase()}.${format}`);
     } catch {
@@ -113,6 +118,10 @@ export function QRCodeActions(props: QRCodeActionsProps) {
           dotType={props.style.dotType}
           cornerSquareType={props.style.cornerSquareType}
           cornerDotType={props.style.cornerDotType}
+          logoImage={props.logoImage}
+          logoSize={props.style.logoSize}
+          logoMargin={props.style.logoMargin}
+          logoOverscan={props.style.logoOverscan}
         />
         <div className="flex gap-2">
           {FORMATS.map(({ format, label }) => (

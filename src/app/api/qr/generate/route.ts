@@ -50,9 +50,20 @@ export async function POST(req: Request) {
       dotType,
       cornerSquareType,
       cornerDotType,
+      logoSize,
+      logoMargin,
+      logoOverscan,
+      logoUrl,
       isDirect,
     } = parsed.data;
-    const style = serializeStyle({ dotType, cornerSquareType, cornerDotType });
+    const style = serializeStyle({
+      dotType,
+      cornerSquareType,
+      cornerDotType,
+      logoSize,
+      logoMargin,
+      logoOverscan,
+    });
 
     const { userId } = await auth();
 
@@ -128,6 +139,7 @@ export async function POST(req: Request) {
           errorCorrection,
           size,
           style,
+          logoUrl,
           isDirect: false,
           shortCode,
           destinationUrl,
@@ -153,6 +165,7 @@ export async function POST(req: Request) {
           errorCorrection,
           size,
           style,
+          logoUrl,
           isDirect: true,
         },
         select: { id: true },

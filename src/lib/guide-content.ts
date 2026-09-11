@@ -215,7 +215,7 @@ export const GUIDE_PAGES: Record<string, GuideDefinition> = {
           },
           {
             title: "Customize the design",
-            text: "Select colors and shapes. Keep strong contrast between the dark code and its light background.",
+            text: "Select colors and shapes. You can also add a PNG, JPG, or WebP logo to the center. Keep strong contrast between the dark code and its light background.",
           },
           {
             title: "Test and download",
@@ -256,7 +256,7 @@ export const GUIDE_PAGES: Record<string, GuideDefinition> = {
       "Select the QR code content type.",
       "Enter and check the content.",
       "Choose Direct or Tracked mode when the type supports both modes.",
-      "Customize the code with high-contrast colors.",
+      "Customize the code with high-contrast colors and an optional center logo.",
       "Scan the preview, then download the code.",
     ],
     faqs: [

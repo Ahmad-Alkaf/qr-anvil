@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { QRDotType, QRCornerSquareType, QRCornerDotType } from "@/lib/qr";
+import {
+  DEFAULT_LOGO_OVERSCAN,
+  DEFAULT_LOGO_MARGIN,
+  DEFAULT_LOGO_SIZE,
+  type QRDotType,
+  type QRCornerSquareType,
+  type QRCornerDotType,
+} from "@/lib/qr";
+import {
+  applySmoothLogoSize,
+  getLogoOptions,
+} from "@/lib/qr-styling-options";
+import { beginPreviewFade } from "@/lib/qr-preview-transition";
 
 export type { QRDotType, QRCornerSquareType, QRCornerDotType };
 
@@ -14,6 +26,10 @@ interface QRPreviewProps {
   dotType?: QRDotType;
   cornerSquareType?: QRCornerSquareType;
   cornerDotType?: QRCornerDotType;
+  logoImage?: string | null;
+  logoSize?: number;
+  logoMargin?: number;
+  logoOverscan?: number;
 }
 
 type QRCodeStylingCtor = typeof import("qr-code-styling").default;
@@ -27,6 +43,10 @@ export function QRPreview({
   dotType = "square",
   cornerSquareType = "square",
   cornerDotType = "square",
+  logoImage = null,
+  logoSize = DEFAULT_LOGO_SIZE,
+  logoMargin = DEFAULT_LOGO_MARGIN,
+  logoOverscan = DEFAULT_LOGO_OVERSCAN,
 }: QRPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [QRStyling, setQRStyling] = useState<QRCodeStylingCtor | null>(null);
@@ -45,9 +65,17 @@ export function QRPreview({
     const container = containerRef.current;
     if (!container) return;
     if (!QRStyling || !value) {
-      container.innerHTML = "";
       return;
     }
+
+    let cancelled = false;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const transition = beginPreviewFade(container, reducedMotion);
+    const nextFrame = document.createElement("div");
+    nextFrame.style.width = `${size}px`;
+    nextFrame.style.height = `${size}px`;
 
     const qr = new QRStyling({
       width: size,
@@ -60,11 +88,33 @@ export function QRPreview({
       cornersDotOptions: { color: fgColor, type: cornerDotType },
       backgroundOptions: { color: bgColor },
       qrOptions: { errorCorrectionLevel: level },
+      ...getLogoOptions(logoImage),
     });
 
-    container.innerHTML = "";
-    qr.append(container);
-  }, [QRStyling, value, size, fgColor, bgColor, level, dotType, cornerSquareType, cornerDotType]);
+    qr.append(nextFrame);
+    void qr
+      .getRawData("svg")
+      .then(() => {
+        if (cancelled) return;
+        const svg = nextFrame.querySelector("svg");
+        if (svg && logoImage) {
+          applySmoothLogoSize(svg, {
+            logoSize,
+            logoMargin,
+            logoOverscan,
+          });
+        }
+        transition.commit(nextFrame);
+      })
+      .catch(() => {
+        if (!cancelled) transition.cancel(true);
+      });
+
+    return () => {
+      cancelled = true;
+      transition.cancel();
+    };
+  }, [QRStyling, value, size, fgColor, bgColor, level, dotType, cornerSquareType, cornerDotType, logoImage, logoSize, logoMargin, logoOverscan]);
 
   if (!value) {
     return (
@@ -84,7 +134,11 @@ export function QRPreview({
       className="inline-flex rounded-2xl p-4 shadow-lg"
       style={{ backgroundColor: bgColor === "transparent" ? "transparent" : bgColor }}
     >
-      <div ref={containerRef} style={{ width: size, height: size }} />
+      <div
+        ref={containerRef}
+        className="relative opacity-100 transition-opacity duration-150 ease-out motion-reduce:transition-none"
+        style={{ width: size, height: size }}
+      />
     </div>
   );
 }

@@ -24,8 +24,12 @@ const HOME_FAQS = [
     a: "PNG, SVG, and PDF. All three are generated in the browser.",
   },
   {
+    q: "Can I add a logo to a QR code?",
+    a: "Yes. QR Anvil accepts PNG, JPG, and WebP logos. It resizes the logo, protects the QR pattern behind it, and uses the highest error correction level.",
+  },
+  {
     q: "Where are QR codes generated?",
-    a: "In the browser, using the qr-code-styling library. Direct QR content is never sent to the server. Tracked QR codes store only the destination URL and a short code on the server.",
+    a: "QR Anvil renders each QR image in the browser. Anonymous URL QR content and logos stay in the browser. For signed-in users, QR Anvil saves the content, logo, and design settings so the dashboard can render the same code again.",
   },
   {
     q: "What does error correction do?",
@@ -87,10 +91,10 @@ export function buildLlmsFullTxt(): string {
     "",
     "1. Choose a QR code type: URL, Wi-Fi, vCard, Email, SMS, WhatsApp, PDF, or Plain Text.",
     "2. Enter the content. Choose Direct mode (content stored in the image) or Tracked mode (short redirect link with scan analytics and an editable destination).",
-    "3. Customize colors, dot style, corner style, and error correction level.",
+    "3. Customize colors, dot style, corner style, and add a center logo. QR Anvil uses Maximum error correction when a logo is present.",
     "4. Download as PNG, SVG, or PDF. The image is rendered in the browser.",
     "",
-    "Account rules: URL QR codes and PNG downloads need no account. A free account is required for the other 7 types, SVG and PDF downloads, Tracked mode, and the analytics dashboard.",
+    "Account rules: URL QR codes and PNG downloads need no account. A free account is required for the other 7 types, SVG and PDF downloads, Tracked mode, and the analytics dashboard. QR Anvil saves the logo and design settings for signed-in users.",
     "",
     heading(2, "Features"),
     "",

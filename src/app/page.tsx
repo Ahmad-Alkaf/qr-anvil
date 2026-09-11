@@ -8,7 +8,7 @@ import {
 	FileText,
 	Type,
 	Zap,
-	Palette,
+	ImagePlus,
 	BarChart3,
 	Shield,
 	ArrowRight,
@@ -86,10 +86,10 @@ const features = [
 			'Add your information and get a QR code that is ready to download and share.'
 	},
 	{
-		icon: Palette,
-		title: 'Make It Yours',
+		icon: ImagePlus,
+		title: 'Put Your Logo at the Center',
 		description:
-			'Choose colors and pattern styles that fit your sign, menu, card, or brand.'
+			'Add a logo or brand image. QR Anvil protects the pattern around it and prepares it for reliable scans.'
 	},
 	{
 		icon: BarChart3,
@@ -116,7 +116,7 @@ const howItWorks = [
 		step: '2',
 		title: 'Choose How It Works',
 		description:
-			'Choose the design. Use Direct for a simple code, or Tracked to count scans and change the link later.'
+			'Choose the colors, pattern, and center logo. Use Direct for a simple code, or Tracked to count scans and change the link later.'
 	},
 	{
 		step: '3',
@@ -169,8 +169,8 @@ const faqs = [
 		a: `Yes. ${SITE_NAME} is free to use with no watermark. URL QR codes and PNG downloads work without an account. A free account unlocks all 8 QR types, SVG and PDF downloads, Tracked mode, and the analytics dashboard.`
 	},
 	{
-		q: 'Can I customize my QR code with colors?',
-		a: 'Yes. You can set the foreground and background colors and choose dot, corner square, and corner dot styles for every QR code.'
+		q: 'Can I add my logo to a QR code?',
+		a: 'Yes. Upload a PNG, JPG, or WebP image and QR Anvil puts it in the center. It resizes the image, clears the pattern behind it, and uses Maximum scan recovery. Always test the downloaded code before you print it.'
 	},
 	{
 		q: 'What QR code types are supported?',
@@ -246,8 +246,8 @@ export default async function HomePage() {
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
 							Create a custom QR code for a link, Wi-Fi password,
 							contact card, message, or PDF. Choose a style,
-							download it, and share it. Use a Tracked code to
-							count scans and update the link later.
+							add your logo, download it, and share it. Use a
+							Tracked code to count scans and update the link later.
 						</p>
 					</div>
 
@@ -301,8 +301,8 @@ export default async function HomePage() {
 					<p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
 						{SITE_NAME} helps you turn links, Wi-Fi access, contact
 						details, messages, PDFs, and text into QR codes. Choose
-						your colors, download a PNG, SVG, or PDF, and share it
-						anywhere. Tracked codes can count scans and let you
+						your colors, add a logo, download a PNG, SVG, or PDF,
+						and share it anywhere. Tracked codes can count scans and let you
 						change a link after you print the code. There is no
 						watermark, expiry, or credit card requirement.
 					</p>

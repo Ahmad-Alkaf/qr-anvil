@@ -7,6 +7,7 @@ import {
   BarChart3,
   LogIn,
   Lock,
+  ChevronDown,
   FileImage,
   FileCode2,
   FileText,
@@ -24,6 +25,9 @@ import {
   Sparkles,
   Gem,
   AlertCircle,
+  AlertTriangle,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import NextLink from "next/link";
@@ -31,6 +35,15 @@ import { QRPreview } from "./qr-preview";
 import { QRTypeFields } from "./qr-type-fields";
 import {
   buildQRData,
+  DEFAULT_LOGO_OVERSCAN,
+  DEFAULT_LOGO_MARGIN,
+  DEFAULT_LOGO_SIZE,
+  LOGO_MARGIN_MAX,
+  LOGO_MARGIN_MIN,
+  LOGO_OVERSCAN_MAX,
+  LOGO_OVERSCAN_MIN,
+  LOGO_SIZE_MAX,
+  LOGO_SIZE_MIN,
   TRACKABLE_TYPES,
   type QRTypeValue,
   type QRDotType,
@@ -38,6 +51,7 @@ import {
   type QRCornerDotType,
 } from "@/lib/qr";
 import { cn } from "@/lib/utils";
+import { getPreparedLogoSize } from "@/lib/qr-styling-options";
 import {
   renderQRBlob,
   downloadBlob,
@@ -82,6 +96,134 @@ const CORNER_DOT_STYLES: { value: QRCornerDotType; label: string }[] = [
   { value: "dot", label: "Dot" },
 ];
 
+const LOGO_FILE_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+const MAX_LOGO_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_LOGO_DATA_URL_LENGTH = 750_000;
+const MAX_PREVIEW_LOGO_SIDE = 768;
+const STORED_LOGO_SIDES = [1536, 1280, 1024, 768, 640, 512] as const;
+const STORED_LOGO_QUALITIES = [0.98, 0.94, 0.9, 0.86, 0.78, 0.7] as const;
+
+interface PreparedLogo {
+  preview: string;
+  master: string;
+  stored: string;
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      typeof reader.result === "string"
+        ? resolve(reader.result)
+        : reject(new Error("The image could not be read."));
+    reader.onerror = () => reject(new Error("The image could not be read."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function loadLogoImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Choose a valid PNG, JPG, or WebP image."));
+    };
+    image.src = objectUrl;
+  });
+}
+
+async function prepareLogoVariant(
+  image: HTMLImageElement,
+  maxSide: number,
+  qualities: readonly number[],
+  maxDataUrlLength = MAX_LOGO_DATA_URL_LENGTH,
+) {
+  const preparedSize = getPreparedLogoSize(
+    image.naturalWidth,
+    image.naturalHeight,
+    maxSide,
+  );
+  const canvas = document.createElement("canvas");
+  canvas.width = preparedSize.width;
+  canvas.height = preparedSize.height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("The image could not be prepared.");
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  const makeBlob = (type: "image/png" | "image/webp", quality?: number) =>
+    new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("The image could not be prepared."))),
+        type,
+        quality
+      );
+    });
+
+  const pngDataUrl = await blobToDataUrl(await makeBlob("image/png"));
+  if (pngDataUrl.length <= maxDataUrlLength) return pngDataUrl;
+
+  for (const quality of qualities) {
+    const dataUrl = await blobToDataUrl(await makeBlob("image/webp", quality));
+    if (dataUrl.length <= maxDataUrlLength) return dataUrl;
+  }
+
+  throw new Error("This image is too detailed. Choose a simpler or smaller image.");
+}
+
+async function prepareLogo(file: File): Promise<PreparedLogo> {
+  if (!LOGO_FILE_TYPES.has(file.type)) {
+    throw new Error("Choose a PNG, JPG, or WebP image.");
+  }
+  if (file.size > MAX_LOGO_FILE_SIZE) {
+    throw new Error("The image must be 5 MB or smaller.");
+  }
+
+  const [image, originalDataUrl] = await Promise.all([
+    loadLogoImage(file),
+    blobToDataUrl(file),
+  ]);
+  const preview = await prepareLogoVariant(
+    image,
+    MAX_PREVIEW_LOGO_SIDE,
+    [],
+    Number.POSITIVE_INFINITY,
+  );
+
+  if (originalDataUrl.length <= MAX_LOGO_DATA_URL_LENGTH) {
+    return {
+      preview,
+      master: originalDataUrl,
+      stored: originalDataUrl,
+    };
+  }
+
+  for (const maxSide of STORED_LOGO_SIDES) {
+    try {
+      const stored = await prepareLogoVariant(
+        image,
+        maxSide,
+        STORED_LOGO_QUALITIES,
+      );
+      return {
+        preview,
+        master: originalDataUrl,
+        stored,
+      };
+    } catch {
+      // Try the next size until the best safe stored copy is found.
+    }
+  }
+
+  throw new Error("This image is too detailed. Choose a simpler or smaller image.");
+}
+
 /* ── Component ── */
 
 export function QRGenerator({ defaultType = "URL", compact = false }: QRGeneratorProps) {
@@ -98,12 +240,22 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
   const [dotType, setDotType] = useState<QRDotType>("square");
   const [cornerSquareType, setCornerSquareType] = useState<QRCornerSquareType>("square");
   const [cornerDotType, setCornerDotType] = useState<QRCornerDotType>("square");
+  const [logoMasterImage, setLogoMasterImage] = useState<string | null>(null);
+  const [logoPreviewImage, setLogoPreviewImage] = useState<string | null>(null);
+  const [logoStoredImage, setLogoStoredImage] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState(DEFAULT_LOGO_SIZE);
+  const [logoMargin, setLogoMargin] = useState(DEFAULT_LOGO_MARGIN);
+  const [logoOverscan, setLogoOverscan] = useState(DEFAULT_LOGO_OVERSCAN);
+  const [logoName, setLogoName] = useState("");
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Remember what was already saved so that downloading the same QR code in
   // several formats does not create duplicate records or short codes.
   const savedRef = useRef<{ key: string; qrData: string } | null>(null);
 
   const effectiveBgColor = transparentBg ? "transparent" : bgColor;
+  const hasLargeLogo = logoSize > DEFAULT_LOGO_SIZE;
 
   // Preview always shows the actual content so users can verify their input.
   // The tracked redirect URL is created server-side only at download time.
@@ -127,6 +279,10 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
         dotType,
         cornerSquareType,
         cornerDotType,
+        logoSize,
+        logoMargin,
+        logoOverscan,
+        logoUrl: logoStoredImage,
         isDirect,
       };
       const saveKey = JSON.stringify(payload);
@@ -180,6 +336,10 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
         dotType,
         cornerSquareType,
         cornerDotType,
+        logoImage: logoMasterImage,
+        logoSize,
+        logoMargin,
+        logoOverscan,
       });
       downloadBlob(blob, `qr-anvil-${type.toLowerCase()}.${format}`);
     } catch {
@@ -187,11 +347,42 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
     } finally {
       setDownloadingFormat(null);
     }
-  }, [type, content, fgColor, effectiveBgColor, errorCorrection, isDirect, isSignedIn, downloadingFormat, dotType, cornerSquareType, cornerDotType]);
+  }, [type, content, fgColor, effectiveBgColor, errorCorrection, isDirect, isSignedIn, downloadingFormat, dotType, cornerSquareType, cornerDotType, logoMasterImage, logoStoredImage, logoSize, logoMargin, logoOverscan]);
 
   const handleContentChange = useCallback((value: string) => {
     setContent(value);
     setError(null);
+  }, []);
+
+  const handleLogoChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+
+    setLogoError(null);
+    try {
+      const prepared = await prepareLogo(file);
+      setLogoMasterImage(prepared.master);
+      setLogoPreviewImage(prepared.preview);
+      setLogoStoredImage(prepared.stored);
+      setLogoName(file.name);
+      setErrorCorrection("H");
+    } catch (logoUploadError) {
+      setLogoError(
+        logoUploadError instanceof Error
+          ? logoUploadError.message
+          : "The image could not be prepared."
+      );
+    }
+  }, []);
+
+  const removeLogo = useCallback(() => {
+    setLogoMasterImage(null);
+    setLogoPreviewImage(null);
+    setLogoStoredImage(null);
+    setLogoName("");
+    setLogoError(null);
   }, []);
 
   const showSignInPrompt = !isDirect && !isSignedIn;
@@ -331,7 +522,10 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
           {/* Corner Style */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="bg-color"
+                className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Outer Corners
               </label>
               <div className="flex gap-1.5">
@@ -376,8 +570,213 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
             </div>
           </div>
 
+          {/* Center logo */}
+          <div>
+            <div className="mb-1.5 flex items-center justify-between gap-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Center Logo
+              </label>
+              <span className="text-[11px] font-medium text-primary">Free for every QR code</span>
+            </div>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+              onChange={handleLogoChange}
+              className="sr-only"
+              aria-label="Upload a center logo"
+            />
+            {logoMasterImage ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 rounded-xl border border-primary/25 bg-primary-50 p-3 dark:bg-primary/10">
+                  <span
+                    aria-hidden="true"
+                    className="h-12 w-12 shrink-0 rounded-lg border border-gray-200 bg-white bg-contain bg-center bg-no-repeat dark:border-gray-700"
+                    style={{ backgroundImage: `url(${logoPreviewImage ?? logoMasterImage})` }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                      {logoName}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Maximum scan recovery is on.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => logoInputRef.current?.click()}
+                    className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:hover:bg-gray-900"
+                  >
+                    Replace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    aria-label="Remove logo"
+                    className="rounded-lg p-1.5 text-gray-500 hover:bg-white hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:hover:bg-gray-900"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="rounded-xl border border-gray-200 px-3 py-3 dark:border-gray-700">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <label
+                      htmlFor="logo-size"
+                      className={cn(
+                        "text-xs font-semibold",
+                        hasLargeLogo
+                          ? "text-amber-700 dark:text-amber-300"
+                          : "text-gray-700 dark:text-gray-300",
+                      )}
+                    >
+                      Logo size
+                    </label>
+                    <output
+                      htmlFor="logo-size"
+                      className={cn(
+                        "min-w-32 rounded-md px-2 py-1 text-center text-xs font-semibold tabular-nums",
+                        hasLargeLogo
+                          ? "bg-amber-100/80 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
+                          : "bg-primary-50 text-primary dark:bg-primary/10",
+                      )}
+                    >
+                      {Math.round(logoSize * 100)}% of center area
+                    </output>
+                  </div>
+                  <input
+                    id="logo-size"
+                    type="range"
+                    min={LOGO_SIZE_MIN * 100}
+                    max={LOGO_SIZE_MAX * 100}
+                    step={1}
+                    value={logoSize * 100}
+                    onChange={(event) => setLogoSize(Number(event.target.value) / 100)}
+                    aria-valuetext={`${Math.round(logoSize * 100)} percent of the center area`}
+                    aria-describedby={
+                      hasLargeLogo ? "logo-size-warning" : undefined
+                    }
+                    className={cn(
+                      "h-2 w-full cursor-pointer",
+                      hasLargeLogo ? "accent-amber-500" : "accent-primary",
+                    )}
+                  />
+                  <div aria-hidden="true" className="mt-1 flex justify-between text-[11px] text-gray-400 dark:text-gray-500">
+                    <span>Smaller</span>
+                    <span>Larger</span>
+                  </div>
+                  {hasLargeLogo && (
+                    <p
+                      id="logo-size-warning"
+                      role="status"
+                      className="mt-2 flex items-start gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-300"
+                    >
+                      <AlertTriangle
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span>
+                        This large logo can reduce scan reliability. Test the QR
+                        code before you use it.
+                      </span>
+                    </p>
+                  )}
+                  <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <label
+                        htmlFor="logo-margin"
+                        className="text-xs font-semibold text-gray-700 dark:text-gray-300"
+                      >
+                        Logo margin
+                      </label>
+                      <output
+                        htmlFor="logo-margin"
+                        className="min-w-32 rounded-md bg-primary-50 px-2 py-1 text-center text-xs font-semibold tabular-nums text-primary dark:bg-primary/10"
+                      >
+                        {Number((logoMargin * 100).toFixed(1))}% of QR width
+                      </output>
+                    </div>
+                    <input
+                      id="logo-margin"
+                      type="range"
+                      min={LOGO_MARGIN_MIN * 100}
+                      max={LOGO_MARGIN_MAX * 100}
+                      step={0.1}
+                      value={logoMargin * 100}
+                      onChange={(event) => setLogoMargin(Number(event.target.value) / 100)}
+                      aria-valuetext={`${Number((logoMargin * 100).toFixed(1))} percent of the QR width on each side`}
+                      className="h-2 w-full cursor-pointer accent-primary"
+                    />
+                    <div aria-hidden="true" className="mt-1 flex justify-between text-[11px] text-gray-400 dark:text-gray-500">
+                      <span>None</span>
+                      <span>More</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <label
+                        htmlFor="logo-zoom"
+                        className="text-xs font-semibold text-gray-700 dark:text-gray-300"
+                      >
+                        Logo zoom
+                      </label>
+                      <output
+                        htmlFor="logo-zoom"
+                        className="min-w-32 rounded-md bg-primary-50 px-2 py-1 text-center text-xs font-semibold tabular-nums text-primary dark:bg-primary/10"
+                      >
+                        {Math.round(logoOverscan * 100)}%
+                      </output>
+                    </div>
+                    <input
+                      id="logo-zoom"
+                      type="range"
+                      min={LOGO_OVERSCAN_MIN * 100}
+                      max={LOGO_OVERSCAN_MAX * 100}
+                      step={1}
+                      value={logoOverscan * 100}
+                      onChange={(event) =>
+                        setLogoOverscan(Number(event.target.value) / 100)
+                      }
+                      aria-valuetext={`${Math.round(logoOverscan * 100)} percent zoom`}
+                      className="h-2 w-full cursor-pointer accent-primary"
+                    />
+                    <div aria-hidden="true" className="mt-1 flex justify-between text-[11px] text-gray-400 dark:text-gray-500">
+                      <span>None</span>
+                      <span>More</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-gray-300 px-4 py-3 text-left transition-colors hover:border-primary hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:border-gray-700 dark:hover:bg-primary/10"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary dark:bg-primary/10">
+                  <ImagePlus className="h-4 w-4" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-gray-900 dark:text-white">
+                    Add your logo
+                  </span>
+                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                    PNG, JPG, or WebP, up to 5 MB
+                  </span>
+                </span>
+              </button>
+            )}
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              We resize the image and protect the pattern around it. Test the downloaded code before you print it.
+            </p>
+            {logoError && (
+              <p role="alert" className="mt-2 text-xs text-red-600 dark:text-red-400">
+                {logoError}
+              </p>
+            )}
+          </div>
+
           {/* Colors */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="fg-color"
@@ -403,25 +802,57 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
               </div>
             </div>
             <div>
-              <label
-                htmlFor="bg-color"
-                className="mb-1.5 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
+              <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Background Color
+              </label>
+              <div
+                role="group"
+                aria-label="Background fill"
+                className="grid grid-cols-2 rounded-lg bg-gray-100 p-1 dark:bg-gray-800"
+              >
                 <button
                   type="button"
-                  onClick={() => setTransparentBg(!transparentBg)}
+                  onClick={() => setTransparentBg(false)}
+                  aria-pressed={!transparentBg}
                   className={cn(
-                    "rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition-all",
-                    transparentBg
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+                    "flex min-h-8 items-center justify-center gap-1.5 rounded-md border px-2 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-800",
+                    !transparentBg
+                      ? "border-primary bg-white text-primary shadow-sm dark:bg-gray-900"
+                      : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                   )}
                 >
+                  <span
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 rounded-sm border border-gray-400 bg-white dark:border-gray-500"
+                    style={{ backgroundColor: bgColor }}
+                  />
+                  Color
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTransparentBg(true)}
+                  aria-pressed={transparentBg}
+                  className={cn(
+                    "flex min-h-8 items-center justify-center gap-1.5 rounded-md border px-2 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-gray-100 dark:focus-visible:ring-offset-gray-800",
+                    transparentBg
+                      ? "border-primary bg-white text-primary shadow-sm dark:bg-gray-900"
+                      : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 rounded-sm border border-gray-400 dark:border-gray-500"
+                    style={{
+                      backgroundColor: "white",
+                      backgroundImage:
+                        "conic-gradient(#cbd5e1 25%, white 0 50%, #cbd5e1 0 75%, white 0)",
+                      backgroundSize: "7px 7px",
+                    }}
+                  />
                   Transparent
                 </button>
-              </label>
-              <div className={cn("flex items-center gap-2", transparentBg && "pointer-events-none opacity-40")}>
+              </div>
+              <div className={cn("mt-2 flex items-center gap-2", transparentBg && "opacity-40")}>
                 <input
                   id="bg-color"
                   type="color"
@@ -444,27 +875,62 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
 
           {/* Error Correction */}
           <div>
-            <label
-              htmlFor="error-correction"
-              className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Scan Reliability
-            </label>
-            <select
-              id="error-correction"
-              value={errorCorrection}
-              onChange={(e) => setErrorCorrection(e.target.value as ErrorCorrection)}
-              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-            >
-              <option value="L">Basic (7% recovery)</option>
-              <option value="M">Recommended (15% recovery)</option>
-              <option value="Q">Strong (25% recovery)</option>
-              <option value="H">Maximum (30% recovery)</option>
-            </select>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              A higher setting helps the code scan if part of it is damaged or
-              covered. Use Maximum for small prints or a code with a logo.
-            </p>
+            <div className="mb-1.5 flex items-center justify-between gap-3">
+              <label
+                htmlFor="error-correction"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Scan Reliability
+              </label>
+              {logoMasterImage && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                  Locked by logo
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <select
+                id="error-correction"
+                value={errorCorrection}
+                onChange={(e) => setErrorCorrection(e.target.value as ErrorCorrection)}
+                disabled={!!logoMasterImage}
+                aria-describedby="error-correction-help"
+                className="w-full appearance-none rounded-xl border border-gray-300 bg-white py-2.5 pl-4 pr-11 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:font-medium disabled:text-gray-500 disabled:shadow-none disabled:opacity-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:disabled:border-gray-700 dark:disabled:bg-gray-800/70 dark:disabled:text-gray-400"
+              >
+                <option value="L">Basic (7% recovery)</option>
+                <option value="M">Recommended (15% recovery)</option>
+                <option value="Q">Strong (25% recovery)</option>
+                <option value="H">Maximum (30% recovery)</option>
+              </select>
+              <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-gray-500 dark:text-gray-400">
+                <ChevronDown className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </div>
+            {logoMasterImage ? (
+              <p
+                id="error-correction-help"
+                role="status"
+                className="mt-2 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-xs font-medium text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/15 dark:text-amber-300"
+              >
+                <AlertTriangle
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>
+                  Maximum (30% recovery) is required because the logo covers part
+                  of the QR pattern.
+                </span>
+              </p>
+            ) : (
+              <p
+                id="error-correction-help"
+                className="mt-1 text-xs text-gray-500 dark:text-gray-400"
+              >
+                A higher setting helps the code scan if part of it is damaged or
+                covered. Use Maximum for small prints.
+              </p>
+            )}
           </div>
 
           {/* Download buttons */}
@@ -589,6 +1055,10 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
             dotType={dotType}
             cornerSquareType={cornerSquareType}
             cornerDotType={cornerDotType}
+            logoImage={logoPreviewImage}
+            logoSize={logoSize}
+            logoMargin={logoMargin}
+            logoOverscan={logoOverscan}
           />
         </div>
       </div>
