@@ -1,10 +1,14 @@
 import { prisma } from "./prisma";
 
+export {formatCount} from './format-count';
+
 export interface SiteStats {
   qrCount: number;
   userCount: number;
   scanCount: number;
 }
+
+const MIN_PUBLIC_USER_COUNT = 100;
 
 /**
  * Site-wide counters shown on the home and about pages.
@@ -17,9 +21,11 @@ export async function getSiteStats(): Promise<SiteStats | null> {
   if (process.env.NEXT_PHASE === "phase-production-build") return null;
 
   try {
-    const [qrCount, userCount, scanCount] = await Promise.all([
+    const userCount = await prisma.user.count();
+    if (userCount < MIN_PUBLIC_USER_COUNT) return null;
+
+    const [qrCount, scanCount] = await Promise.all([
       prisma.qRGenEvent.count(),
-      prisma.user.count(),
       prisma.scan.count(),
     ]);
     return { qrCount, userCount, scanCount };
@@ -27,10 +33,4 @@ export async function getSiteStats(): Promise<SiteStats | null> {
     console.error("Site stats unavailable:", error);
     return null;
   }
-}
-
-export function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M+`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")}K+`;
-  return n.toLocaleString("en-US");
 }

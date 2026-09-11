@@ -17,8 +17,9 @@ import {
 import Link from 'next/link';
 import {QRGenerator} from '@/components/qr/qr-generator';
 import {JsonLd} from '@/components/seo/json-ld';
+import {SiteStatsStrip} from '@/components/stats/site-stats-strip';
 import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/constants';
-import {getSiteStats, formatCount} from '@/lib/stats';
+import {getSiteStats} from '@/lib/stats';
 import {
 	faqJsonLd,
 	howToJsonLd,
@@ -260,32 +261,11 @@ export default async function HomePage() {
 
 			{/* Stats (hidden when the database is unavailable) */}
 			{stats && (
-				<section
-					aria-label="Usage statistics"
-					className="border-y border-gray-200 bg-white py-8 dark:border-gray-800 dark:bg-gray-950">
-					<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-						<div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-12">
-							<div className="text-sm text-gray-500 dark:text-gray-400">
-								<strong className="text-gray-900 dark:text-white">
-									{formatCount(stats.userCount)}
-								</strong>{' '}
-								users
-							</div>
-							<div className="text-sm text-gray-500 dark:text-gray-400">
-								<strong className="text-gray-900 dark:text-white">
-									{formatCount(stats.qrCount)}
-								</strong>{' '}
-								QR codes created
-							</div>
-							<div className="text-sm text-gray-500 dark:text-gray-400">
-								<strong className="text-gray-900 dark:text-white">
-									{formatCount(stats.scanCount)}
-								</strong>{' '}
-								scans tracked
-							</div>
-						</div>
-					</div>
-				</section>
+				<SiteStatsStrip
+					userCount={stats.userCount}
+					qrCount={stats.qrCount}
+					scanCount={stats.scanCount}
+				/>
 			)}
 
 			{/* What is QR Anvil (entity definition for search and AI answers) */}
