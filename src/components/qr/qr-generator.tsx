@@ -1462,6 +1462,8 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                           : "Saved in My QR Codes."}{" "}
                       <NextLink
                         href={`/dashboard/qr-codes/${activeQRCodeId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="inline-flex items-center gap-0.5 font-semibold underline hover:no-underline"
                       >
                         View
