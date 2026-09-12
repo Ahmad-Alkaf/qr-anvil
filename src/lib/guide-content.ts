@@ -37,7 +37,7 @@ export type GuideDefinition = {
   relatedSlugs: string[];
 };
 
-export const GUIDES_LAST_MODIFIED = new Date("2026-09-09");
+export const GUIDES_LAST_MODIFIED = new Date("2026-09-12");
 
 export const GUIDE_PAGES: Record<string, GuideDefinition> = {
   "connect-to-wifi-with-qr-code-windows": {

@@ -9,7 +9,7 @@ import type { QRTypeFaq } from "@/lib/qr-type-content";
  */
 
 /** Date the public copy last changed. Update it when the wording changes. */
-export const CONTENT_LAST_MODIFIED = new Date("2026-09-09");
+export const CONTENT_LAST_MODIFIED = new Date("2026-09-12");
 
 export const SITE_TAGLINE = "Free QR Codes Made Simple";
 
