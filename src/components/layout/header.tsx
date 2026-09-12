@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useState} from 'react';
 import {Menu, X} from 'lucide-react';
-import {Show, UserButton, SignInButton} from '@clerk/nextjs';
+import {UserButton, SignInButton, SignUpButton, useAuth} from '@clerk/nextjs';
 import {cn} from '@/lib/utils';
 import {SITE_NAME} from '@/lib/constants';
 import {Logo} from '@/components/brand/mark';
@@ -18,6 +18,8 @@ const navLinks = [
 
 export function Header() {
 	const [mobileOpen, setMobileOpen] = useState(false);
+	const {isLoaded, isSignedIn} = useAuth();
+	const showSignedOutActions = !isLoaded || !isSignedIn;
 
 	return (
 		<header className="sticky top-0 z-50 border-b backdrop-blur-lg border-gray-800/60 bg-gray-950/80">
@@ -47,32 +49,40 @@ export function Header() {
 
 				{/* CTA / Auth */}
 				<div className="hidden items-center gap-3 md:flex">
-					<Show when="signed-out">
-						<SignInButton>
-							<button className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-								Log in
-							</button>
-						</SignInButton>
-						<Link
-							href="/#generator"
-							className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark">
-							Create QR Code
-						</Link>
-					</Show>
-					<Show when="signed-in">
-						<Link
-							href="/dashboard"
-							className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-							Dashboard
-						</Link>
-						<UserButton
-							appearance={{
-								elements: {
-									avatarBox: 'h-9 w-9'
-								}
-							}}
-						/>
-					</Show>
+					{showSignedOutActions ? (
+						<>
+							<SignInButton>
+								<button className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+									Sign In
+								</button>
+							</SignInButton>
+							<SignUpButton>
+								<button className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-800 hover:text-white">
+									Sign Up
+								</button>
+							</SignUpButton>
+							<Link
+								href="/#generator"
+								className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark">
+								Create QR Code
+							</Link>
+						</>
+					) : (
+						<>
+							<Link
+								href="/dashboard"
+								className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+								Dashboard
+							</Link>
+							<UserButton
+								appearance={{
+									elements: {
+										avatarBox: 'h-9 w-9'
+									}
+								}}
+							/>
+						</>
+					)}
 				</div>
 
 				{/* Mobile menu button */}
@@ -104,31 +114,37 @@ export function Header() {
 							{link.label}
 						</Link>
 					))}
-					<Show when="signed-out">
-						<div className="flex gap-2 pt-2">
+					{showSignedOutActions ? (
+						<div className="grid grid-cols-2 gap-2 pt-2">
 							<SignInButton>
 								<button
 									onClick={() => setMobileOpen(false)}
-									className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">
-									Log in
+									className="rounded-xl border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+									Sign In
 								</button>
 							</SignInButton>
+							<SignUpButton>
+								<button
+									onClick={() => setMobileOpen(false)}
+									className="rounded-xl border border-primary px-4 py-2.5 text-center text-sm font-medium text-primary transition-colors hover:bg-primary/10">
+									Sign Up
+								</button>
+							</SignUpButton>
 							<Link
 								href="/#generator"
 								onClick={() => setMobileOpen(false)}
-								className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white">
+								className="col-span-2 rounded-xl bg-primary px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-primary-dark">
 								Create QR
 							</Link>
 						</div>
-					</Show>
-					<Show when="signed-in">
+					) : (
 						<Link
 							href="/dashboard"
 							onClick={() => setMobileOpen(false)}
 							className="block rounded-lg px-4 py-2.5 text-sm font-medium text-primary">
 							Dashboard
 						</Link>
-					</Show>
+					)}
 				</nav>
 			</div>
 		</header>

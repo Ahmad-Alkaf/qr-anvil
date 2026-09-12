@@ -675,7 +675,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                         aria-hidden="true"
                       />
                       <span>
-                        This large logo can reduce scan reliability. Test the QR
+                        Large logo can reduce scan reliability. Test the QR
                         code before you use it.
                       </span>
                     </p>
