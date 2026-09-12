@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, forwardRef } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import {
   Link as LinkIcon,
   Wifi,
@@ -18,6 +18,7 @@ import {
   Lock,
 } from "lucide-react";
 import type { QRTypeValue } from "@/lib/qr";
+import { addHttpsPrefix } from "@/lib/url-input";
 
 const inputClass =
   "w-full rounded-xl border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500";
@@ -70,11 +71,9 @@ function getUrlWarning(val: string): "protocol" | "domain" | null {
 function URLFields({ onChange }: FieldProps) {
   const [warning, setWarning] = useState<"protocol" | "domain" | null>(null);
   const [inputValue, setInputValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const prefixWithHttps = () => {
     const fixed = `https://${inputValue}`;
-    if (inputRef.current) inputRef.current.value = fixed;
     setInputValue(fixed);
     onChange(fixed);
     setWarning(null);
@@ -84,14 +83,15 @@ function URLFields({ onChange }: FieldProps) {
     <div>
       <label className={labelClass}>Website URL</label>
       <IconInput
-        ref={inputRef}
         icon={LinkIcon}
         type="url"
         placeholder="https://example.com"
+        value={inputValue}
         onChange={(e) => {
-          onChange(e.target.value);
-          setInputValue(e.target.value.trim());
-          if (warning) setWarning(getUrlWarning(e.target.value.trim()));
+          const value = addHttpsPrefix(e.target.value);
+          setInputValue(value);
+          onChange(value);
+          if (warning) setWarning(getUrlWarning(value.trim()));
         }}
         onBlur={(e) => setWarning(getUrlWarning(e.target.value.trim()))}
       />
