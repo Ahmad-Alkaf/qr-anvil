@@ -2,9 +2,20 @@
 
 Free QR code generator with scan analytics. A [KafLabs](https://kaflabs.com) product.
 
+[Open QR Anvil](https://qr-anvil.com) · [View source](https://github.com/Ahmad-Alkaf/qr-anvil)
+
+![QR Anvil home page with its QR generator and public source link](docs/screenshots/home.jpg)
+
 - Next.js 16, React 19, Tailwind CSS 4
 - Clerk (auth), Prisma 7 + PostgreSQL (data)
 - QR images are generated in the browser with `qr-code-styling`. The server only stores metadata and serves the `/r/[shortCode]` redirect for Tracked QR codes.
+
+## Design decisions
+
+- QR images and downloads are rendered in the browser. The server stores metadata, not generated images.
+- Direct codes contain the content itself. Tracked codes use a short redirect so the destination can change after printing and scans can be counted.
+- Clerk manages accounts. Prisma and PostgreSQL store saved codes and scan history.
+- Shared validation keeps the QR content formats consistent across the generator and API.
 
 ## Local development
 
@@ -79,3 +90,10 @@ Client IPs are read from `cf-connecting-ip`, then `x-forwarded-for`, then `x-rea
 - `src/lib/qr-export.ts` browser-side PNG/SVG/PDF rendering.
 - `src/lib/request.ts` client IP and geo header helpers.
 - `prisma/schema.prisma` and `prisma/migrations/`. The generated client goes to `src/generated/prisma/` (ignored by git).
+
+## Checks and license
+
+Run `npm run typecheck`, `npm run lint`, and `npm test` before submitting a change.
+Vitest checks QR content building, request helpers, and short codes. Account and scan flows also need checks with local service settings.
+
+The source is public under [PolyForm Noncommercial 1.0.0](LICENSE). See the license for permitted uses and conditions.

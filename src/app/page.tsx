@@ -18,7 +18,7 @@ import Link from 'next/link';
 import {QRGenerator} from '@/components/qr/qr-generator';
 import {JsonLd} from '@/components/seo/json-ld';
 import {SiteStatsStrip} from '@/components/stats/site-stats-strip';
-import {SITE_DESCRIPTION, SITE_NAME} from '@/lib/constants';
+import {GITHUB_REPOSITORY_URL, SITE_DESCRIPTION, SITE_NAME} from '@/lib/constants';
 import {getSiteStats} from '@/lib/stats';
 import {
 	faqJsonLd,
@@ -250,6 +250,11 @@ export default async function HomePage() {
 							add your logo, download it, and share it. Use a
 							Tracked code to count scans and update the link later.
 						</p>
+						<a
+							href={GITHUB_REPOSITORY_URL}
+							className="mt-4 inline-flex min-h-11 items-center rounded-sm text-sm font-medium text-gray-700 underline underline-offset-4 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-4 dark:text-gray-300 dark:hover:text-white">
+							View source on GitHub
+						</a>
 					</div>
 
 					{/* Inline QR Generator */}

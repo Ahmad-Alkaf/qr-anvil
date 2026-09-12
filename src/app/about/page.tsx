@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import {QrCode, BarChart3, Users} from 'lucide-react';
-import {SITE_NAME} from '@/lib/constants';
+import {GITHUB_PROFILE_URL, GITHUB_REPOSITORY_URL, SITE_NAME} from '@/lib/constants';
 import {getSiteStats, formatCount} from '@/lib/stats';
 
 export const metadata: Metadata = {
@@ -58,6 +58,20 @@ export default async function AboutPage() {
 				)}
 
 				<div className="mt-16 space-y-8 text-gray-600 dark:text-gray-400">
+					<section aria-labelledby="developer-heading">
+						<h2 id="developer-heading" className="font-heading text-2xl font-bold text-gray-900 dark:text-white">
+							The developer and source code
+						</h2>
+						<p className="mt-4 leading-relaxed">
+							Built and maintained by{' '}
+							<a href={GITHUB_PROFILE_URL} className="text-gray-700 underline underline-offset-4 dark:text-gray-200">Ahmad Alkaf</a>
+							{' '}as a KafLabs product. The source code is public. You can inspect how QR generation,
+							editable links, and scan analytics work.
+						</p>
+						<a href={GITHUB_REPOSITORY_URL} className="mt-2 inline-flex min-h-11 items-center text-gray-700 underline underline-offset-4 dark:text-gray-200">
+							View source on GitHub
+						</a>
+					</section>
 					<div>
 						<h2 className="font-heading text-2xl font-bold text-gray-900 dark:text-white">
 							Our Approach

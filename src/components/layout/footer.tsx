@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/mark";
-import { SITE_NAME, KAFLABS_URL, KAFLABS_PRIVACY_URL, KAFLABS_TERMS_URL, SUPPORT_EMAIL } from "@/lib/constants";
+import { GITHUB_REPOSITORY_URL, SITE_NAME, KAFLABS_URL, KAFLABS_PRIVACY_URL, KAFLABS_TERMS_URL, SUPPORT_EMAIL } from "@/lib/constants";
 
 const footerLinks = {
   "QR Code Types": [
@@ -83,6 +83,13 @@ export function Footer() {
                     </Link>
                   </li>
                 ))}
+                {category === "Company" && (
+                  <li>
+                    <a href={GITHUB_REPOSITORY_URL} className={linkClass}>
+                      Source code
+                    </a>
+                  </li>
+                )}
                 {category === "Company" && (
                   <li>
                     <a href={`mailto:${SUPPORT_EMAIL}`} className={linkClass}>

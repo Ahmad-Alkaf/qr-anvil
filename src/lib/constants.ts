@@ -1,4 +1,6 @@
 export const SITE_NAME = "QR Anvil";
+export const GITHUB_REPOSITORY_URL = "https://github.com/Ahmad-Alkaf/qr-anvil";
+export const GITHUB_PROFILE_URL = "https://github.com/Ahmad-Alkaf";
 // Canonical origin. Tracked QR codes embed it, so set NEXT_PUBLIC_SITE_URL
 // at build time in production (see Dockerfile).
 export const SITE_URL = (
