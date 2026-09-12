@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useState} from 'react';
 import {Menu, X} from 'lucide-react';
-import {UserButton, SignInButton, SignUpButton, useAuth} from '@clerk/nextjs';
+import {UserButton, useAuth} from '@clerk/nextjs';
 import {cn} from '@/lib/utils';
 import {SITE_NAME} from '@/lib/constants';
 import {Logo} from '@/components/brand/mark';
@@ -51,16 +51,16 @@ export function Header() {
 				<div className="hidden items-center gap-3 md:flex">
 					{showSignedOutActions ? (
 						<>
-							<SignInButton>
-								<button className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-									Sign In
-								</button>
-							</SignInButton>
-							<SignUpButton>
-								<button className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-800 hover:text-white">
-									Sign Up
-								</button>
-							</SignUpButton>
+							<Link
+								href="/sign-in"
+								className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+								Sign In
+							</Link>
+							<Link
+								href="/sign-up"
+								className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:bg-gray-800 hover:text-white">
+								Sign Up
+							</Link>
 							<Link
 								href="/#generator"
 								className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark">
@@ -116,20 +116,18 @@ export function Header() {
 					))}
 					{showSignedOutActions ? (
 						<div className="grid grid-cols-2 gap-2 pt-2">
-							<SignInButton>
-								<button
-									onClick={() => setMobileOpen(false)}
-									className="rounded-xl border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-									Sign In
-								</button>
-							</SignInButton>
-							<SignUpButton>
-								<button
-									onClick={() => setMobileOpen(false)}
-									className="rounded-xl border border-primary px-4 py-2.5 text-center text-sm font-medium text-primary transition-colors hover:bg-primary/10">
-									Sign Up
-								</button>
-							</SignUpButton>
+							<Link
+								href="/sign-in"
+								onClick={() => setMobileOpen(false)}
+								className="rounded-xl border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+								Sign In
+							</Link>
+							<Link
+								href="/sign-up"
+								onClick={() => setMobileOpen(false)}
+								className="rounded-xl border border-primary px-4 py-2.5 text-center text-sm font-medium text-primary transition-colors hover:bg-primary/10">
+								Sign Up
+							</Link>
 							<Link
 								href="/#generator"
 								onClick={() => setMobileOpen(false)}
