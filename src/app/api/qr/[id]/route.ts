@@ -2,14 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-
-const patchSchema = z.object({
-  name: z.string().trim().max(255).optional(),
-  destinationUrl: z
-    .url({ protocol: /^https?$/, hostname: z.regexes.domain })
-    .max(2048)
-    .optional(),
-});
+import { parseStyle, qrPatchSchema, serializeStyle } from "@/lib/qr";
 
 async function loadOwnedQRCode(id: string) {
   const { userId } = await auth();
@@ -62,7 +55,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const parsed = patchSchema.safeParse(body);
+  const parsed = qrPatchSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Invalid input", details: z.treeifyError(parsed.error) },
@@ -77,6 +70,17 @@ export async function PATCH(
     );
   }
 
+  const currentStyle = parseStyle(qrCode.style);
+  const style = serializeStyle({
+    dotType: parsed.data.dotType ?? currentStyle.dotType,
+    cornerSquareType:
+      parsed.data.cornerSquareType ?? currentStyle.cornerSquareType,
+    cornerDotType: parsed.data.cornerDotType ?? currentStyle.cornerDotType,
+    logoSize: parsed.data.logoSize ?? currentStyle.logoSize,
+    logoMargin: parsed.data.logoMargin ?? currentStyle.logoMargin,
+    logoOverscan: parsed.data.logoOverscan ?? currentStyle.logoOverscan,
+  });
+
   const updated = await prisma.qRCode.update({
     where: { id },
     data: {
@@ -85,8 +89,29 @@ export async function PATCH(
           ? qrCode.name
           : parsed.data.name || null,
       destinationUrl: parsed.data.destinationUrl ?? qrCode.destinationUrl,
+      foregroundColor:
+        parsed.data.foregroundColor ?? qrCode.foregroundColor,
+      backgroundColor:
+        parsed.data.backgroundColor ?? qrCode.backgroundColor,
+      size: parsed.data.size ?? qrCode.size,
+      errorCorrection:
+        parsed.data.errorCorrection ?? qrCode.errorCorrection,
+      style,
+      logoUrl:
+        parsed.data.logoUrl === undefined ? qrCode.logoUrl : parsed.data.logoUrl,
     },
-    select: { id: true, name: true, destinationUrl: true, updatedAt: true },
+    select: {
+      id: true,
+      name: true,
+      destinationUrl: true,
+      foregroundColor: true,
+      backgroundColor: true,
+      size: true,
+      errorCorrection: true,
+      style: true,
+      logoUrl: true,
+      updatedAt: true,
+    },
   });
 
   return NextResponse.json(updated);

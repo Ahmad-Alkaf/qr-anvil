@@ -9,10 +9,15 @@ import {
 } from "@/lib/qr";
 import { prisma } from "@/lib/prisma";
 import { ensureUser } from "@/lib/auth";
-import { generateShortCode } from "@/lib/shortcode";
-import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  checkRateLimit,
+  checkReservationCreationRateLimit,
+} from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request";
-import { SITE_URL } from "@/lib/constants";
+import {
+  activateTrackedQRCode,
+  reserveTrackedQRCode,
+} from "@/lib/tracked-reservation";
 
 export async function POST(req: Request) {
   try {
@@ -101,6 +106,16 @@ export async function POST(req: Request) {
         );
       }
 
+      const reservationLimit = await checkReservationCreationRateLimit(
+        user.clerkId
+      );
+      if (!reservationLimit.success) {
+        return NextResponse.json(
+          { error: "Too many tracked QR reservations. Please try again later." },
+          { status: 429 }
+        );
+      }
+
       const destinationUrl = buildQRData(type, content);
       if (!/^https?:\/\//i.test(destinationUrl)) {
         return NextResponse.json(
@@ -109,48 +124,16 @@ export async function POST(req: Request) {
         );
       }
 
-      const MAX_RETRIES = 10;
-      let shortCode: string | null = null;
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        const candidate = generateShortCode();
-        const exists = await prisma.qRCode.findUnique({
-          where: { shortCode: candidate },
-          select: { id: true },
-        });
-        if (!exists) {
-          shortCode = candidate;
-          break;
-        }
-      }
-      if (!shortCode) {
-        return NextResponse.json(
-          { error: "Failed to generate unique short code. Please try again." },
-          { status: 500 }
-        );
-      }
+      // Keep this legacy endpoint safe. New clients reserve and activate in two
+      // explicit requests, but old clients still get a permanently claimed code.
+      const reservation = await reserveTrackedQRCode(user.id, { type, content });
+      const created = await activateTrackedQRCode(
+        reservation.reservationId,
+        user.id,
+        parsed.data
+      );
 
-      const created = await prisma.qRCode.create({
-        data: {
-          userId: user.id,
-          type,
-          content,
-          foregroundColor,
-          backgroundColor,
-          errorCorrection,
-          size,
-          style,
-          logoUrl,
-          isDirect: false,
-          shortCode,
-          destinationUrl,
-        },
-        select: { id: true, shortCode: true },
-      });
-
-      return NextResponse.json({
-        id: created.id,
-        qrData: `${SITE_URL}/r/${created.shortCode}`,
-      });
+      return NextResponse.json(created);
     }
 
     // Direct mode: save to the account when signed in

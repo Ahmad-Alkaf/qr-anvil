@@ -106,6 +106,34 @@ export const qrGenerateSchema = z.object({
 
 export type QRGenerateInput = z.infer<typeof qrGenerateSchema>;
 
+/**
+ * Partial update schema for an existing QR code.
+ *
+ * Every design field uses `.unwrap()` to strip the `.default()` of
+ * `qrGenerateSchema`. Zod applies a default even behind `.optional()`, so
+ * without `.unwrap()` a body that carries only `name` or `destinationUrl`
+ * would come back filled with default colors, size and style and overwrite
+ * the stored design.
+ */
+export const qrPatchSchema = z.object({
+  name: z.string().trim().max(255).optional(),
+  destinationUrl: z
+    .url({ protocol: /^https?$/, hostname: z.regexes.domain })
+    .max(2048)
+    .optional(),
+  foregroundColor: qrGenerateSchema.shape.foregroundColor.unwrap().optional(),
+  backgroundColor: qrGenerateSchema.shape.backgroundColor.unwrap().optional(),
+  size: qrGenerateSchema.shape.size.unwrap().optional(),
+  errorCorrection: qrGenerateSchema.shape.errorCorrection.unwrap().optional(),
+  dotType: qrGenerateSchema.shape.dotType.unwrap().optional(),
+  cornerSquareType: qrGenerateSchema.shape.cornerSquareType.unwrap().optional(),
+  cornerDotType: qrGenerateSchema.shape.cornerDotType.unwrap().optional(),
+  logoSize: qrGenerateSchema.shape.logoSize.unwrap().optional(),
+  logoMargin: qrGenerateSchema.shape.logoMargin.unwrap().optional(),
+  logoOverscan: qrGenerateSchema.shape.logoOverscan.unwrap().optional(),
+  logoUrl: qrGenerateSchema.shape.logoUrl.unwrap().optional(),
+});
+
 /** Serialize the visual options into the single `style` column. */
 export function serializeStyle(style: QRStyle): string {
   return `${style.dotType}/${style.cornerSquareType}/${style.cornerDotType}/${style.logoSize}/${style.logoMargin}/${style.logoOverscan}`;

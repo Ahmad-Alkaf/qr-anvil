@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   Loader2,
   Zap,
@@ -26,6 +26,9 @@ import {
   Gem,
   AlertCircle,
   AlertTriangle,
+  CheckCircle2,
+  Clock3,
+  ExternalLink,
   ImagePlus,
   X,
 } from "lucide-react";
@@ -63,6 +66,47 @@ import {
 interface QRGeneratorProps {
   defaultType?: QRTypeValue;
   compact?: boolean;
+}
+
+type TrackedStatus =
+  | "idle"
+  | "preparing"
+  | "renewing"
+  | "ready"
+  | "activating"
+  | "active"
+  | "destination-changed"
+  | "error";
+
+interface TrackedReservation {
+  reservationId: string;
+  qrData: string;
+  expiresAt: string;
+}
+
+const TRACKED_RESERVATION_KEY = "qr-anvil:tracked-reservation";
+const TRACKED_RENEW_INTERVAL_MS = 5 * 60 * 1000;
+const TRACKED_INPUT_DELAY_MS = 500;
+
+function hasTrackableDestination(type: QRTypeValue, content: string): boolean {
+  return TRACKABLE_TYPES.has(type) && /^https?:\/\//i.test(buildQRData(type, content));
+}
+
+function readTrackedReservation(value: unknown): TrackedReservation | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Record<string, unknown>;
+  if (
+    typeof candidate.reservationId !== "string" ||
+    typeof candidate.qrData !== "string" ||
+    typeof candidate.expiresAt !== "string"
+  ) {
+    return null;
+  }
+  return {
+    reservationId: candidate.reservationId,
+    qrData: candidate.qrData,
+    expiresAt: candidate.expiresAt,
+  };
 }
 
 const QR_TYPE_OPTIONS: { value: QRTypeValue; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -248,50 +292,336 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
   const [logoOverscan, setLogoOverscan] = useState(DEFAULT_LOGO_OVERSCAN);
   const [logoName, setLogoName] = useState("");
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [trackedReservation, setTrackedReservation] =
+    useState<TrackedReservation | null>(null);
+  const [trackedStatus, setTrackedStatus] = useState<TrackedStatus>("idle");
+  const [activeQRCodeId, setActiveQRCodeId] = useState<string | null>(null);
+  const [activeDestinationKey, setActiveDestinationKey] = useState<string | null>(null);
+  const [designSaveState, setDesignSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const logoInputRef = useRef<HTMLInputElement>(null);
-
-  // Remember what was already saved so that downloading the same QR code in
-  // several formats does not create duplicate records or short codes.
-  const savedRef = useRef<{ key: string; qrData: string } | null>(null);
+  const directSavedRef = useRef<{ key: string; qrData: string } | null>(null);
+  const trackedReservationRef = useRef<TrackedReservation | null>(null);
+  const reservationRequestRef = useRef(0);
+  const lastReservationCheckRef = useRef(0);
+  const lastSavedDesignKeyRef = useRef<string | null>(null);
 
   const effectiveBgColor = transparentBg ? "transparent" : bgColor;
   const hasLargeLogo = logoSize > DEFAULT_LOGO_SIZE;
+  const directQRData = content ? buildQRData(type, content) : "";
+  const destinationKey = hasTrackableDestination(type, content)
+    ? `${type}:${buildQRData(type, content)}`
+    : null;
+  const trackedDestinationChanged =
+    !!activeQRCodeId &&
+    !!activeDestinationKey &&
+    activeDestinationKey !== destinationKey;
+  const effectiveTrackedStatus: TrackedStatus =
+    trackedStatus === "activating"
+      ? "activating"
+      : trackedDestinationChanged
+        ? "destination-changed"
+        : activeQRCodeId
+          ? "active"
+          : trackedStatus;
+  const qrData = isDirect
+    ? directQRData
+    : effectiveTrackedStatus === "ready" ||
+        effectiveTrackedStatus === "renewing" ||
+        effectiveTrackedStatus === "active" ||
+        effectiveTrackedStatus === "destination-changed"
+      ? trackedReservation?.qrData ?? ""
+      : "";
 
-  // Preview always shows the actual content so users can verify their input.
-  // The tracked redirect URL is created server-side only at download time.
-  const qrData = content ? buildQRData(type, content) : "";
+  const visualPayload = {
+    foregroundColor: fgColor,
+    backgroundColor: effectiveBgColor,
+    size: EXPORT_SIZE,
+    errorCorrection,
+    dotType,
+    cornerSquareType,
+    cornerDotType,
+    logoSize,
+    logoMargin,
+    logoOverscan,
+    logoUrl: logoStoredImage,
+  };
+  const visualKey = JSON.stringify(visualPayload);
+
+  const getGeneratePayload = useCallback(
+    (direct: boolean) => ({
+      type,
+      content,
+      ...visualPayload,
+      isDirect: direct,
+    }),
+    // visualKey contains every visual option in visualPayload.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [type, content, visualKey],
+  );
+
+  const ensureTrackedReservation = useCallback(
+    async (
+      currentType: QRTypeValue,
+      currentContent: string,
+      options: { quiet?: boolean; forceNew?: boolean } = {},
+    ): Promise<TrackedReservation | null> => {
+      if (!hasTrackableDestination(currentType, currentContent)) return null;
+
+      const requestId = ++reservationRequestRef.current;
+      const existing = options.forceNew ? null : trackedReservationRef.current;
+      if (!options.quiet) {
+        setTrackedStatus(existing ? "renewing" : "preparing");
+      }
+
+      const request = (reservationId: string | null) =>
+        fetch(
+          reservationId
+            ? `/api/qr/reservations/${reservationId}`
+            : "/api/qr/reservations",
+          {
+            method: reservationId ? "PATCH" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: currentType, content: currentContent }),
+          },
+        );
+
+      try {
+        let response = await request(existing?.reservationId ?? null);
+        if (existing && (response.status === 404 || response.status === 409)) {
+          response = await request(null);
+        }
+        const data: unknown = await response.json().catch(() => null);
+        if (!response.ok) {
+          const message =
+            data && typeof data === "object" && "error" in data
+              ? String((data as { error: unknown }).error)
+              : "Could not prepare the Tracked preview.";
+          throw new Error(message);
+        }
+        const reservation = readTrackedReservation(data);
+        if (!reservation) throw new Error("The server returned an invalid Tracked preview.");
+        if (requestId !== reservationRequestRef.current) return null;
+
+        trackedReservationRef.current = reservation;
+        setTrackedReservation(reservation);
+        setTrackedStatus("ready");
+        setError(null);
+        lastReservationCheckRef.current = Date.now();
+        try {
+          window.sessionStorage.setItem(
+            TRACKED_RESERVATION_KEY,
+            JSON.stringify(reservation),
+          );
+        } catch {
+          // The reservation still works when browser storage is unavailable.
+        }
+        return reservation;
+      } catch (reservationError) {
+        if (requestId !== reservationRequestRef.current) return null;
+        setTrackedStatus("error");
+        setError(
+          reservationError instanceof Error
+            ? reservationError.message
+            : "Could not prepare the Tracked preview.",
+        );
+        return null;
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    try {
+      const stored = window.sessionStorage.getItem(TRACKED_RESERVATION_KEY);
+      if (!stored) return;
+      const reservation = readTrackedReservation(JSON.parse(stored));
+      if (reservation) trackedReservationRef.current = reservation;
+    } catch {
+      // The server lease is still authoritative when browser storage is invalid.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDirect || !isSignedIn || !destinationKey || activeQRCodeId) return;
+
+    const timer = window.setTimeout(() => {
+      void ensureTrackedReservation(type, content);
+    }, TRACKED_INPUT_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [
+    activeQRCodeId,
+    content,
+    destinationKey,
+    ensureTrackedReservation,
+    isDirect,
+    isSignedIn,
+    type,
+  ]);
+
+  useEffect(() => {
+    if (isDirect || !isSignedIn || activeQRCodeId || !destinationKey) return;
+
+    const renew = () => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastReservationCheckRef.current > 10_000
+      ) {
+        void ensureTrackedReservation(type, content, { quiet: true });
+      }
+    };
+    const interval = window.setInterval(renew, TRACKED_RENEW_INTERVAL_MS);
+    window.addEventListener("focus", renew);
+    document.addEventListener("visibilitychange", renew);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", renew);
+      document.removeEventListener("visibilitychange", renew);
+    };
+  }, [
+    activeQRCodeId,
+    content,
+    destinationKey,
+    ensureTrackedReservation,
+    isDirect,
+    isSignedIn,
+    type,
+  ]);
+
+  useEffect(() => {
+    if (!activeQRCodeId || lastSavedDesignKeyRef.current === visualKey) return;
+    setDesignSaveState("saving");
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/qr/${activeQRCodeId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: visualKey,
+        });
+        if (!response.ok) throw new Error("Design save failed");
+        lastSavedDesignKeyRef.current = visualKey;
+        setDesignSaveState("saved");
+      } catch {
+        setDesignSaveState("error");
+      }
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [activeQRCodeId, visualKey]);
+
+  const handleCreateTracked = useCallback(async () => {
+    if (!isSignedIn || !destinationKey || trackedStatus === "activating") return;
+    setError(null);
+
+    if (activeQRCodeId) {
+      if (!trackedDestinationChanged) return;
+      setTrackedStatus("activating");
+      try {
+        const response = await fetch(`/api/qr/${activeQRCodeId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ destinationUrl: buildQRData(type, content) }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Could not update the destination.");
+        setActiveDestinationKey(destinationKey);
+        setTrackedStatus("active");
+      } catch (updateError) {
+        setTrackedStatus("destination-changed");
+        setError(
+          updateError instanceof Error
+            ? updateError.message
+            : "Could not update the destination.",
+        );
+      }
+      return;
+    }
+
+    let reservation = await ensureTrackedReservation(type, content, { quiet: true });
+    if (!reservation) return;
+    setTrackedStatus("activating");
+
+    const activate = (current: TrackedReservation) =>
+      fetch(`/api/qr/reservations/${current.reservationId}/activate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(getGeneratePayload(false)),
+      });
+
+    try {
+      let response = await activate(reservation);
+      if (response.status === 409) {
+        reservation =
+          (await ensureTrackedReservation(type, content, {
+            quiet: true,
+            forceNew: true,
+          })) ?? reservation;
+        setTrackedStatus("activating");
+        response = await activate(reservation);
+      }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || typeof data.id !== "string" || typeof data.qrData !== "string") {
+        throw new Error(data.error || "Could not create the Tracked QR code.");
+      }
+
+      const activeReservation = { ...reservation, qrData: data.qrData };
+      trackedReservationRef.current = activeReservation;
+      setTrackedReservation(activeReservation);
+      setActiveQRCodeId(data.id);
+      setActiveDestinationKey(destinationKey);
+      lastSavedDesignKeyRef.current = visualKey;
+      setDesignSaveState("saved");
+      setTrackedStatus("active");
+      try {
+        window.sessionStorage.removeItem(TRACKED_RESERVATION_KEY);
+      } catch {
+        // The active QR code no longer depends on browser storage.
+      }
+      fetch("/api/qr/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      }).catch(() => {});
+    } catch (activationError) {
+      setTrackedStatus("ready");
+      setError(
+        activationError instanceof Error
+          ? activationError.message
+          : "Could not create the Tracked QR code.",
+      );
+    }
+  }, [
+    activeQRCodeId,
+    content,
+    destinationKey,
+    ensureTrackedReservation,
+    getGeneratePayload,
+    isSignedIn,
+    trackedDestinationChanged,
+    trackedStatus,
+    type,
+    visualKey,
+  ]);
 
   const handleDownload = useCallback(async (format: DownloadFormat) => {
     if (!content || downloadingFormat) return;
     if (!isDirect && !isSignedIn) return;
+    if (!isDirect && (!activeQRCodeId || trackedDestinationChanged)) {
+      setError("Create the Tracked QR code before you download it.");
+      return;
+    }
 
     setDownloadingFormat(format);
     setError(null);
 
     try {
-      const payload = {
-        type,
-        content,
-        foregroundColor: fgColor,
-        backgroundColor: effectiveBgColor,
-        size: EXPORT_SIZE,
-        errorCorrection,
-        dotType,
-        cornerSquareType,
-        cornerDotType,
-        logoSize,
-        logoMargin,
-        logoOverscan,
-        logoUrl: logoStoredImage,
-        isDirect,
-      };
+      const payload = getGeneratePayload(true);
       const saveKey = JSON.stringify(payload);
+      let qrDataToEncode = trackedReservationRef.current?.qrData ?? "";
 
-      let qrDataToEncode: string;
-
-      if (savedRef.current?.key === saveKey) {
-        qrDataToEncode = savedRef.current.qrData;
-      } else {
+      if (isDirect && directSavedRef.current?.key === saveKey) {
+        qrDataToEncode = directSavedRef.current.qrData;
+      } else if (isDirect) {
         // Anonymous counter: records only the QR type, never the content.
         fetch("/api/qr/track", {
           method: "POST",
@@ -299,33 +629,19 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
           body: JSON.stringify({ type }),
         }).catch(() => {});
 
-        if (isDirect) {
-          qrDataToEncode = buildQRData(type, content);
-          // Save to the account when signed in. Failure does not block the download.
-          if (isSignedIn) {
-            fetch("/api/qr/generate", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: saveKey,
-            }).catch(() => {});
-          }
-        } else {
-          // Tracked: create the record and get the redirect URL
-          const res = await fetch("/api/qr/generate", {
+        qrDataToEncode = buildQRData(type, content);
+        // Save Direct codes to the account when signed in. A save failure does
+        // not block the browser download.
+        if (isSignedIn) {
+          fetch("/api/qr/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: saveKey,
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || typeof data.qrData !== "string") {
-            setError(data.error || "Failed to create the Tracked QR code. Please try again.");
-            return;
-          }
-          qrDataToEncode = data.qrData;
+          }).catch(() => {});
         }
-
-        savedRef.current = { key: saveKey, qrData: qrDataToEncode };
+        directSavedRef.current = { key: saveKey, qrData: qrDataToEncode };
       }
+      if (!qrDataToEncode) throw new Error("The QR code is not ready.");
 
       const blob = await renderQRBlob({
         data: qrDataToEncode,
@@ -347,11 +663,27 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
     } finally {
       setDownloadingFormat(null);
     }
-  }, [type, content, fgColor, effectiveBgColor, errorCorrection, isDirect, isSignedIn, downloadingFormat, dotType, cornerSquareType, cornerDotType, logoMasterImage, logoStoredImage, logoSize, logoMargin, logoOverscan]);
+  }, [activeQRCodeId, content, downloadingFormat, effectiveBgColor, errorCorrection, fgColor, getGeneratePayload, isDirect, isSignedIn, logoMargin, logoMasterImage, logoOverscan, logoSize, cornerDotType, cornerSquareType, dotType, trackedDestinationChanged, type]);
 
   const handleContentChange = useCallback((value: string) => {
     setContent(value);
     setError(null);
+  }, []);
+
+  const resetTrackedSession = useCallback(() => {
+    reservationRequestRef.current += 1;
+    trackedReservationRef.current = null;
+    setTrackedReservation(null);
+    setTrackedStatus("idle");
+    setActiveQRCodeId(null);
+    setActiveDestinationKey(null);
+    setDesignSaveState("idle");
+    lastSavedDesignKeyRef.current = null;
+    try {
+      window.sessionStorage.removeItem(TRACKED_RESERVATION_KEY);
+    } catch {
+      // Expired server reservations remain safe when browser storage is unavailable.
+    }
   }, []);
 
   const handleLogoChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -388,6 +720,20 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
   const showSignInPrompt = !isDirect && !isSignedIn;
   const needsLoginForType = type !== "URL" && !isSignedIn;
   const needsLoginForFormat = !isSignedIn;
+  const trackedActionPending =
+    effectiveTrackedStatus === "preparing" ||
+    effectiveTrackedStatus === "renewing" ||
+    effectiveTrackedStatus === "activating";
+  const trackedDownloadReady =
+    !!activeQRCodeId &&
+    !trackedDestinationChanged &&
+    effectiveTrackedStatus === "active";
+  const reservationExpiry = trackedReservation
+    ? new Date(trackedReservation.expiresAt).toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : null;
 
   return (
     <>
@@ -412,6 +758,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                   type="button"
                   onClick={() => {
                     if (value !== type) {
+                      resetTrackedSession();
                       setType(value);
                       setContent("");
                       setError(null);
@@ -445,6 +792,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
               <button
                 type="button"
                 onClick={() => setIsDirect(true)}
+                aria-pressed={isDirect}
                 className={cn(
                   "flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all",
                   isDirect
@@ -461,6 +809,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
               <button
                 type="button"
                 onClick={() => setIsDirect(false)}
+                aria-pressed={!isDirect}
                 className={cn(
                   "flex items-center gap-2 rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition-all",
                   !isDirect
@@ -933,6 +1282,35 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
             )}
           </div>
 
+          {!isDirect && isSignedIn && (!activeQRCodeId || trackedDestinationChanged) && (
+            <div className="rounded-xl border border-primary/25 bg-primary-50/70 p-4 dark:bg-primary/10">
+              <button
+                type="button"
+                onClick={handleCreateTracked}
+                disabled={!destinationKey || trackedActionPending}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {trackedActionPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <BarChart3 className="h-4 w-4" />
+                )}
+                {effectiveTrackedStatus === "activating"
+                  ? trackedDestinationChanged
+                    ? "Updating destination"
+                    : "Creating tracked QR code"
+                  : trackedDestinationChanged
+                    ? "Update tracked destination"
+                    : "Create tracked QR code"}
+              </button>
+              <p className="mt-2 text-xs leading-5 text-gray-600 dark:text-gray-300">
+                {trackedDestinationChanged
+                  ? "The active code still opens the previous destination. Update it before you share this code."
+                  : "This activates the reserved link and saves the current design in My QR Codes."}
+              </p>
+            </div>
+          )}
+
           {/* Download buttons */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -986,7 +1364,10 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                   },
                 ] as const).map(({ format, label, sub, icon: Icon, locked, bg, activeBg }) => {
                   const isActive = downloadingFormat === format;
-                  const isDisabled = !content || !!downloadingFormat;
+                  const isDisabled =
+                    !content ||
+                    !!downloadingFormat ||
+                    (!isDirect && !trackedDownloadReady);
 
                   if (locked) {
                     return (
@@ -1046,20 +1427,100 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
 
         {/* Right: Preview */}
         <div className="flex items-center justify-center">
-          <QRPreview
-            value={qrData}
-            size={compact ? 200 : 280}
-            fgColor={fgColor}
-            bgColor={effectiveBgColor}
-            level={errorCorrection}
-            dotType={dotType}
-            cornerSquareType={cornerSquareType}
-            cornerDotType={cornerDotType}
-            logoImage={logoPreviewImage}
-            logoSize={logoSize}
-            logoMargin={logoMargin}
-            logoOverscan={logoOverscan}
-          />
+          <div className="flex max-w-full flex-col items-center gap-3">
+            {!isDirect && isSignedIn && destinationKey && (
+              <div
+                aria-live="polite"
+                className={cn(
+                  "flex w-full max-w-xs items-start gap-2 rounded-xl border px-3 py-2 text-xs",
+                  effectiveTrackedStatus === "active"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
+                    : effectiveTrackedStatus === "destination-changed"
+                      ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300"
+                      : "border-primary/20 bg-primary-50/70 text-gray-700 dark:bg-primary/10 dark:text-gray-300",
+                )}
+              >
+                {effectiveTrackedStatus === "active" ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : effectiveTrackedStatus === "destination-changed" ? (
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : effectiveTrackedStatus === "ready" ? (
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : effectiveTrackedStatus === "error" ? (
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : (
+                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin" />
+                )}
+                <span>
+                  {effectiveTrackedStatus === "active" ? (
+                    <>
+                      <strong>Tracked QR code active.</strong>{" "}
+                      {designSaveState === "saving"
+                        ? "Saving the design..."
+                        : designSaveState === "error"
+                          ? "The design could not be saved."
+                          : "Saved in My QR Codes."}{" "}
+                      <NextLink
+                        href={`/dashboard/qr-codes/${activeQRCodeId}`}
+                        className="inline-flex items-center gap-0.5 font-semibold underline hover:no-underline"
+                      >
+                        View
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                      </NextLink>
+                    </>
+                  ) : effectiveTrackedStatus === "destination-changed" ? (
+                    <>
+                      <strong>Destination changed.</strong> Update the active link before you download it.
+                    </>
+                  ) : effectiveTrackedStatus === "ready" ? (
+                    <>
+                      <strong>Tracked preview ready.</strong>{" "}
+                      {reservationExpiry ? `Reserved until ${reservationExpiry}.` : "The link is reserved for one hour."}
+                    </>
+                  ) : effectiveTrackedStatus === "error" ? (
+                    <strong>The Tracked preview is not ready.</strong>
+                  ) : (
+                    <strong>Preparing the real Tracked preview...</strong>
+                  )}
+                </span>
+              </div>
+            )}
+
+            {!isDirect && (!isSignedIn || !destinationKey || !qrData) ? (
+              <div
+                className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800/50"
+                style={{
+                  width: (compact ? 200 : 280) + 32,
+                  height: (compact ? 200 : 280) + 32,
+                }}
+              >
+                <p className="max-w-48 text-sm text-gray-500 dark:text-gray-400">
+                  {!isSignedIn
+                    ? "Sign in to prepare a real Tracked preview."
+                    : !destinationKey
+                      ? "Enter a full web address to prepare the Tracked preview."
+                      : effectiveTrackedStatus === "error"
+                        ? "Retry with the Create tracked QR code button."
+                        : "Preparing the real Tracked preview..."}
+                </p>
+              </div>
+            ) : (
+              <QRPreview
+                value={qrData}
+                size={compact ? 200 : 280}
+                fgColor={fgColor}
+                bgColor={effectiveBgColor}
+                level={errorCorrection}
+                dotType={dotType}
+                cornerSquareType={cornerSquareType}
+                cornerDotType={cornerDotType}
+                logoImage={logoPreviewImage}
+                logoSize={logoSize}
+                logoMargin={logoMargin}
+                logoOverscan={logoOverscan}
+              />
+            )}
+          </div>
         </div>
       </div>
     </>

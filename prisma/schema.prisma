@@ -9,13 +9,14 @@ datasource db {
 
 // ─── User (synced from Clerk via webhook) ────────────
 model User {
-  id      String @id @default(cuid())
-  clerkId String @unique
-  email   String @unique
-  name    String?
-  image   String?
-  qrCodes         QRCode[]
-  scans           Scan[]
+  id                  String                 @id @default(cuid())
+  clerkId             String                 @unique
+  email               String                 @unique
+  name                String?
+  image               String?
+  qrCodes             QRCode[]
+  scans               Scan[]
+  trackedReservations TrackedQRReservation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -44,16 +45,16 @@ model QRCode {
   content String  @db.Text
 
   // Customization
-  foregroundColor String @default("#000000")
-  backgroundColor String @default("#FFFFFF")
+  foregroundColor String  @default("#000000")
+  backgroundColor String  @default("#FFFFFF")
   logoUrl         String?
-  style           String @default("squares")
-  errorCorrection String @default("M")
-  size            Int    @default(300)
+  style           String  @default("squares")
+  errorCorrection String  @default("M")
+  size            Int     @default(300)
 
   // Direct QR: encodes content directly (no redirect, no analytics, faster scan)
   // Tracked QR: encodes a short redirect URL (enables analytics + editable destination)
-  isDirect       Boolean @default(true)
+  isDirect Boolean @default(true)
 
   // Tracked QR fields (isDirect=false)
   shortCode      String? @unique
@@ -96,6 +97,30 @@ model Scan {
   @@index([qrCodeId])
   @@index([scannedAt])
   @@index([qrCodeId, scannedAt])
+}
+
+// Permanent short-code claims. A reservation keeps its destination only while
+// its one-hour lease is valid. Activated and expired claims stay as tombstones
+// so a short code can never point to a different user's destination.
+model TrackedQRReservation {
+  id                String    @id @default(cuid())
+  shortCode         String    @unique
+  userId            String?
+  type              QRType?
+  destinationUrl    String?   @db.Text
+  expiresAt         DateTime
+  activatedAt       DateTime?
+  activatedQRCodeId String?   @unique
+  expiredAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([shortCode])
 }
 
 // ─── QR Generation Events (anonymous analytics) ──────

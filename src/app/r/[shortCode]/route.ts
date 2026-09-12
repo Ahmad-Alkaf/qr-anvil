@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { anonymizeIp, getClientIp, getGeo } from "@/lib/request";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { getReservedRedirect } from "@/lib/tracked-reservation";
 
 export const dynamic = "force-dynamic";
 
@@ -29,22 +30,39 @@ export async function GET(
 ) {
   const { shortCode } = await params;
 
-  const qr = await prisma.qRCode.findUnique({
+  let qr = await prisma.qRCode.findUnique({
     where: { shortCode },
     select: { id: true, destinationUrl: true },
   });
 
+  if (!qr) {
+    const reservedDestination = await getReservedRedirect(shortCode);
+    if (reservedDestination) {
+      // Draft scans prove that the reserved QR works, but they are not analytics.
+      return redirectResponse(reservedDestination);
+    }
+
+    // Activation can finish between the first active lookup and the reservation
+    // lookup. Check once more so that scan does not see a temporary 404.
+    qr = await prisma.qRCode.findUnique({
+      where: { shortCode },
+      select: { id: true, destinationUrl: true },
+    });
+  }
+
   // Only allow http(s) redirects to prevent open redirects to javascript:, data:, etc.
   const dest = qr?.destinationUrl;
-  if (!qr || !dest || !/^https?:\/\//i.test(dest)) {
-    return notFoundPage();
-  }
+  if (!qr || !dest || !/^https?:\/\//i.test(dest)) return notFoundPage();
 
   // Log the scan after the response is sent so the redirect is not delayed.
   const headers = new Headers(req.headers);
   after(() => logScan(qr.id, headers).catch(console.error));
 
-  return NextResponse.redirect(dest, {
+  return redirectResponse(dest);
+}
+
+function redirectResponse(destination: string): NextResponse {
+  return NextResponse.redirect(destination, {
     status: 302,
     // Short links are private redirects. Keep them and their destinations out
     // of search results under our domain.
