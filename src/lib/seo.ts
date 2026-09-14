@@ -9,7 +9,7 @@ import type { QRTypeFaq } from "@/lib/qr-type-content";
  */
 
 /** Date the public copy last changed. Update it when the wording changes. */
-export const CONTENT_LAST_MODIFIED = new Date("2026-09-12");
+export const CONTENT_LAST_MODIFIED = new Date("2026-09-14");
 
 export const SITE_TAGLINE = "Free QR Codes Made Simple";
 
@@ -30,7 +30,8 @@ export const FEATURE_LIST = [
   "Free to use, no watermark",
 ];
 
-const ORGANIZATION_ID = `${KAFLABS_URL}/#organization`;
+const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+const PARENT_ORGANIZATION_ID = `${KAFLABS_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 const APP_ID = `${SITE_URL}/#app`;
 
@@ -38,14 +39,14 @@ export function organizationJsonLd() {
   return {
     "@type": "Organization",
     "@id": ORGANIZATION_ID,
-    name: "KafLabs",
-    url: KAFLABS_URL,
+    name: SITE_NAME,
+    url: SITE_URL,
     logo: `${SITE_URL}/logo/icon-512.png`,
-    brand: {
-      "@type": "Brand",
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: `${SITE_URL}/logo/icon-512.png`,
+    parentOrganization: {
+      "@type": "Organization",
+      "@id": PARENT_ORGANIZATION_ID,
+      name: "KafLabs",
+      url: KAFLABS_URL,
     },
   };
 }
@@ -85,7 +86,7 @@ export function webApplicationJsonLd() {
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
     },
-    author: { "@id": ORGANIZATION_ID },
+    author: { "@id": PARENT_ORGANIZATION_ID },
     publisher: { "@id": ORGANIZATION_ID },
   };
 }

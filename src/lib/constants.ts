@@ -17,7 +17,7 @@ export const KAFLABS_PRIVACY_URL = "https://kaflabs.com/privacy";
 export const KAFLABS_TERMS_URL = "https://kaflabs.com/terms";
 
 export const SITE_DESCRIPTION =
-  "Create free QR codes for links, Wi-Fi, contacts, messages, PDFs, and more. Add your logo, customize the design, and track scans when you need to.";
+  "Create free QR codes with your logo. Download PNG files without an account. Get SVG, PDF, editable links, and scan analytics with a free account.";
 
 export const QR_TYPE_INFO = {
   URL: {

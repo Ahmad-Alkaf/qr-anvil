@@ -55,7 +55,7 @@ export const metadata: Metadata = {
 	],
 	authors: [{name: 'KafLabs', url: 'https://kaflabs.com'}],
 	creator: 'KafLabs',
-	publisher: 'KafLabs',
+	publisher: SITE_NAME,
 	category: 'technology',
 	classification: 'QR code generator',
 	referrer: 'strict-origin-when-cross-origin',

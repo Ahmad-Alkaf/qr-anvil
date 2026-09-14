@@ -31,13 +31,14 @@ describe("sitemap", () => {
     expect(paths.sort()).toEqual(expectedPaths.sort());
   });
 
-  it("uses the latest public content date", () => {
-    const modificationDates = sitemap().map(({ lastModified }) =>
-      new Date(lastModified as string | Date).toISOString(),
-    );
+  it("keeps guide dates separate from the updated public copy", () => {
+    for (const { url, lastModified } of sitemap()) {
+      const path = new URL(url).pathname;
+      const expectedDate = path === "/guides" || path.startsWith("/guides/")
+        ? "2026-09-12T00:00:00.000Z"
+        : "2026-09-14T00:00:00.000Z";
 
-    expect(new Set(modificationDates)).toEqual(
-      new Set(["2026-09-12T00:00:00.000Z"]),
-    );
+      expect(new Date(lastModified as string | Date).toISOString()).toBe(expectedDate);
+    }
   });
 });

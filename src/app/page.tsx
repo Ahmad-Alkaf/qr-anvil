@@ -245,10 +245,7 @@ export default async function HomePage() {
 							</span>
 						</h1>
 						<p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-							Create a custom QR code for a link, Wi-Fi password,
-							contact card, message, or PDF. Choose a style,
-							add your logo, download it, and share it. Use a
-							Tracked code to count scans and update the link later.
+							{SITE_DESCRIPTION}
 						</p>
 						<a
 							href={GITHUB_REPOSITORY_URL}
@@ -284,12 +281,13 @@ export default async function HomePage() {
 						What is {SITE_NAME}?
 					</h2>
 					<p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
-						{SITE_NAME} helps you turn links, Wi-Fi access, contact
-						details, messages, PDFs, and text into QR codes. Choose
-						your colors, add a logo, download a PNG, SVG, or PDF,
-						and share it anywhere. Tracked codes can count scans and let you
-						change a link after you print the code. There is no
-						watermark, expiry, or credit card requirement.
+						{SITE_NAME} is a free QR code generator for links, Wi-Fi,
+						contacts, messages, PDFs, and text. Create a URL QR code
+						and download a PNG without an account. A free account
+						unlocks all eight QR types, SVG and PDF downloads, and
+						Tracked codes with scan analytics and editable links.
+						Choose your colors and add your logo. There is no
+						watermark or credit card requirement.
 					</p>
 				</div>
 			</section>
