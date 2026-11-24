@@ -4,13 +4,14 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
 import { QRGenerator } from "@/components/qr/qr-generator";
 import { JsonLd } from "@/components/seo/json-ld";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/constants";
 import { QR_TYPE_PAGES, QR_TYPE_SLUGS } from "@/lib/qr-type-content";
 import {
   breadcrumbJsonLd,
   faqJsonLd,
   howToJsonLd,
   jsonLdGraph,
+  pageSocialMetadata,
   webPageJsonLd,
 } from "@/lib/seo";
 
@@ -32,16 +33,11 @@ export async function generateMetadata({
     description: page.description,
     keywords: page.keywords,
     alternates: { canonical: `/qr-types/${type}` },
-    openGraph: {
+    ...pageSocialMetadata({
+      path: `/qr-types/${type}`,
       title: page.title,
       description: page.description,
-      url: `${SITE_URL}/qr-types/${type}`,
-      type: "website",
-    },
-    twitter: {
-      title: page.title,
-      description: page.description,
-    },
+    }),
   };
 }
 

@@ -1,9 +1,9 @@
 import { ImageResponse } from "next/og";
-import { SITE_NAME } from "@/lib/constants";
 import { BRAND_ORANGE, BRAND_TAGLINE, MARK_PATH, MARK_VIEWBOX } from "@/lib/brand";
+import { OG_IMAGE_ALT, OG_IMAGE_SIZE } from "@/lib/seo";
 
-export const alt = `${SITE_NAME} — Free QR Code Generator`;
-export const size = { width: 1200, height: 630 };
+export const alt = OG_IMAGE_ALT;
+export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";
 
 export default function OpenGraphImage() {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { KAFLABS_URL, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/constants";
 import type { QRTypeFaq } from "@/lib/qr-type-content";
 
@@ -12,6 +13,49 @@ import type { QRTypeFaq } from "@/lib/qr-type-content";
 export const CONTENT_LAST_MODIFIED = new Date("2026-09-14");
 
 export const SITE_TAGLINE = "Free QR Codes Made Simple";
+
+/** Alt text and size of the root `opengraph-image` route. */
+export const OG_IMAGE_ALT = `${SITE_NAME} — Free QR Code Generator`;
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
+
+const OG_IMAGE = {
+  url: "/opengraph-image",
+  ...OG_IMAGE_SIZE,
+  alt: OG_IMAGE_ALT,
+  type: "image/png",
+};
+
+/**
+ * Open Graph and Twitter metadata for a page that has its own title.
+ *
+ * Next.js merges metadata objects shallowly: a page `openGraph` or `twitter`
+ * object replaces the object of the root layout, together with its image,
+ * site name, locale, and card type. This helper adds those shared fields again.
+ */
+export function pageSocialMetadata(opts: {
+  path: string;
+  title: string;
+  description: string;
+  type?: "website" | "article";
+}): Pick<Metadata, "openGraph" | "twitter"> {
+  return {
+    openGraph: {
+      type: opts.type ?? "website",
+      locale: "en_US",
+      url: `${SITE_URL}${opts.path}`,
+      siteName: SITE_NAME,
+      title: opts.title,
+      description: opts.description,
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: opts.title,
+      description: opts.description,
+      images: [OG_IMAGE],
+    },
+  };
+}
 
 /** One-paragraph description reused by structured data and llms.txt. */
 export const SITE_SUMMARY =
