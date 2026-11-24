@@ -33,10 +33,11 @@ export function Logo({
   const text = size === "lg" ? "text-3xl" : size === "sm" ? "text-base" : tagline ? "text-2xl" : "text-xl";
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
-      <Mark className={cn(mark, "text-primary")} />
+      {/* Logo text has no contrast minimum: keep the exact brand orange (primary-600). */}
+      <Mark className={cn(mark, "text-primary-600")} />
       <span className="flex flex-col leading-none">
         <span className={cn("font-heading font-bold tracking-tight", text)}>
-          <span className="text-primary">QR</span>
+          <span className="text-primary-600">QR</span>
           <span className="text-gray-900 dark:text-white"> Anvil</span>
         </span>
         {tagline && (

@@ -122,7 +122,7 @@ export function QRPreview({
         className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50"
         style={{ width: size, height: size }}
       >
-        <p className="px-4 text-center text-sm text-gray-400 dark:text-gray-500">
+        <p className="px-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Enter content to generate a QR code
         </p>
       </div>

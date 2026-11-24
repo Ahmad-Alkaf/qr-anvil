@@ -124,7 +124,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-gray-200 pt-8 dark:border-gray-800">
-          <p className="text-center text-sm text-gray-400 dark:text-gray-500">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()}{" "}
             <a
               href={KAFLABS_URL}
