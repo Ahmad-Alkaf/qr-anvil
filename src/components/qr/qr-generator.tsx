@@ -803,7 +803,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                 <Zap className="h-4 w-4" />
                 <div>
                   <div>Direct</div>
-                  <div className="text-xs font-normal opacity-70">Open right away</div>
+                  <div className="text-xs font-normal">Open right away</div>
                 </div>
               </button>
               <button
@@ -820,7 +820,7 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                 <BarChart3 className="h-4 w-4" />
                 <div>
                   <div>Tracked</div>
-                  <div className="text-xs font-normal opacity-70">Analytics enabled</div>
+                  <div className="text-xs font-normal">Analytics enabled</div>
                 </div>
               </button>
             </div>
@@ -1375,12 +1375,12 @@ export function QRGenerator({ defaultType = "URL", compact = false }: QRGenerato
                         key={format}
                         href="/sign-in"
                         title={`Sign in to download ${label}`}
-                        className="group flex flex-col items-center gap-2 rounded-xl bg-gray-200 px-4 py-4 text-center opacity-50 transition-all hover:opacity-70 dark:bg-gray-800"
+                        className="group flex flex-col items-center gap-2 rounded-xl bg-gray-200 px-4 py-4 text-center transition-all hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700"
                       >
                         <Lock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                         <div>
                           <div className="text-sm font-semibold text-gray-500 dark:text-gray-400">{label}</div>
-                          <div className="text-[11px] text-gray-400 dark:text-gray-500">{sub}</div>
+                          <div className="text-[11px] text-gray-500 dark:text-gray-400">{sub}</div>
                         </div>
                       </NextLink>
                     );
