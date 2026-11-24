@@ -13,7 +13,12 @@ import {
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { GUIDE_PAGES } from "@/lib/guide-content";
-import { breadcrumbJsonLd, jsonLdGraph, webPageJsonLd } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  jsonLdGraph,
+  pageSocialMetadata,
+  webPageJsonLd,
+} from "@/lib/seo";
 
 const TITLE = "QR Code Guides: Create, Scan, and Share";
 const DESCRIPTION =
@@ -23,13 +28,11 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/guides" },
-  openGraph: {
+  ...pageSocialMetadata({
+    path: "/guides",
     title: TITLE,
     description: DESCRIPTION,
-    url: `${SITE_URL}/guides`,
-    type: "website",
-  },
-  twitter: { title: TITLE, description: DESCRIPTION },
+  }),
 };
 
 const GUIDE_ORDER = [

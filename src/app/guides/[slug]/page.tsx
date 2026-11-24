@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { GuidePage } from "@/components/guides/guide-page";
-import { SITE_URL } from "@/lib/constants";
 import { GUIDE_PAGES, GUIDE_SLUGS } from "@/lib/guide-content";
+import { pageSocialMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
   return GUIDE_SLUGS.map((slug) => ({ slug }));
@@ -18,22 +18,16 @@ export async function generateMetadata({
 
   if (!guide) return {};
 
-  const url = `${SITE_URL}/guides/${guide.slug}`;
-
   return {
     title: guide.title,
     description: guide.description,
     alternates: { canonical: `/guides/${guide.slug}` },
-    openGraph: {
+    ...pageSocialMetadata({
+      path: `/guides/${guide.slug}`,
       title: guide.title,
       description: guide.description,
-      url,
       type: "article",
-    },
-    twitter: {
-      title: guide.title,
-      description: guide.description,
-    },
+    }),
   };
 }
 

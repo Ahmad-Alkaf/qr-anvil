@@ -16,7 +16,12 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TRACKABLE_TYPES } from "@/lib/qr";
 import { QR_TYPE_PAGE_LIST } from "@/lib/qr-type-content";
-import { breadcrumbJsonLd, jsonLdGraph, webPageJsonLd } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  jsonLdGraph,
+  pageSocialMetadata,
+  webPageJsonLd,
+} from "@/lib/seo";
 
 const TITLE = "QR Code Types — URL, Wi-Fi, vCard, Email, SMS, WhatsApp, PDF, Text";
 const DESCRIPTION =
@@ -33,13 +38,11 @@ export const metadata: Metadata = {
     "static vs dynamic QR code",
   ],
   alternates: { canonical: "/qr-types" },
-  openGraph: {
+  ...pageSocialMetadata({
+    path: "/qr-types",
     title: TITLE,
     description: DESCRIPTION,
-    url: `${SITE_URL}/qr-types`,
-    type: "website",
-  },
-  twitter: { title: TITLE, description: DESCRIPTION },
+  }),
 };
 
 const ICONS: Record<string, LucideIcon> = {

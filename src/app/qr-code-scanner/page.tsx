@@ -4,7 +4,13 @@ import {Camera, ImageUp, LockKeyhole, ScanLine} from 'lucide-react';
 import {QRScanner} from '@/components/qr/qr-scanner';
 import {JsonLd} from '@/components/seo/json-ld';
 import {SITE_NAME, SITE_URL} from '@/lib/constants';
-import {faqJsonLd, howToJsonLd, jsonLdGraph, webPageJsonLd} from '@/lib/seo';
+import {
+	faqJsonLd,
+	howToJsonLd,
+	jsonLdGraph,
+	pageSocialMetadata,
+	webPageJsonLd
+} from '@/lib/seo';
 
 const title = 'QR Code Scanner - Scan QR Codes Online Free';
 const description =
@@ -14,17 +20,11 @@ export const metadata: Metadata = {
 	title,
 	description,
 	alternates: {canonical: '/qr-code-scanner'},
-	openGraph: {
-		type: 'website',
-		url: `${SITE_URL}/qr-code-scanner`,
+	...pageSocialMetadata({
+		path: '/qr-code-scanner',
 		title: `${title} | ${SITE_NAME}`,
 		description
-	},
-	twitter: {
-		card: 'summary_large_image',
-		title: `${title} | ${SITE_NAME}`,
-		description
-	}
+	})
 };
 
 const steps = [
