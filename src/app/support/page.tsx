@@ -2,12 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Heart, ArrowRight } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
+import { pageSocialMetadata } from "@/lib/seo";
+
+const TITLE = `Support ${SITE_NAME}`;
+const DESCRIPTION = `${SITE_NAME} is free for everyone. Support the project to help keep it running.`;
 
 export const metadata: Metadata = {
-  title: `Support ${SITE_NAME}`,
-  description:
-    `${SITE_NAME} is free for everyone. Support the project to help keep it running.`,
+  // Absolute: the root template would add "| QR Anvil" a second time.
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
   alternates: { canonical: "/support" },
+  ...pageSocialMetadata({ path: "/support", title: TITLE, description: DESCRIPTION }),
 };
 
 export default function SupportPage() {

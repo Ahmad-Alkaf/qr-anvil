@@ -1,10 +1,15 @@
 import {SITE_NAME, LEGAL_EMAIL, KAFLABS_TERMS_URL} from '@/lib/constants';
+import {pageSocialMetadata} from '@/lib/seo';
 import type {Metadata} from 'next';
 
+const TITLE = 'Terms of Service';
+const DESCRIPTION = `${SITE_NAME} Terms of Service — read our terms and conditions for using the QR code generator platform.`;
+
 export const metadata: Metadata = {
-	title: 'Terms of Service',
-	description: `${SITE_NAME} Terms of Service — read our terms and conditions for using the QR code generator platform.`,
-	alternates: {canonical: '/terms'}
+	title: TITLE,
+	description: DESCRIPTION,
+	alternates: {canonical: '/terms'},
+	...pageSocialMetadata({path: '/terms', title: TITLE, description: DESCRIPTION})
 };
 
 // Keep this date equal to the day the wording last changed.

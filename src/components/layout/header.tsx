@@ -5,7 +5,6 @@ import {useState} from 'react';
 import {Menu, X} from 'lucide-react';
 import {UserButton, useAuth} from '@clerk/nextjs';
 import {cn} from '@/lib/utils';
-import {SITE_NAME} from '@/lib/constants';
 import {Logo} from '@/components/brand/mark';
 
 const navLinks = [
@@ -24,10 +23,9 @@ export function Header() {
 	return (
 		<header className="sticky top-0 z-50 border-b backdrop-blur-lg border-gray-800/60 bg-gray-950/80">
 			<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-				{/* Logo */}
+				{/* Logo. No aria-label: the visible name and tagline are the accessible name (WCAG 2.5.3). */}
 				<Link
 						href="/"
-						aria-label={`${SITE_NAME} home`}
 						className="group flex items-center">
 						<Logo
 							tagline

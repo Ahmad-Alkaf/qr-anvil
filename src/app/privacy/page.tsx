@@ -1,10 +1,15 @@
 import {SITE_NAME, PRIVACY_EMAIL, KAFLABS_PRIVACY_URL} from '@/lib/constants';
+import {pageSocialMetadata} from '@/lib/seo';
 import type {Metadata} from 'next';
 
+const TITLE = 'Privacy Policy';
+const DESCRIPTION = `${SITE_NAME} Privacy Policy — learn how we collect, use, and protect your data.`;
+
 export const metadata: Metadata = {
-	title: 'Privacy Policy',
-	description: `${SITE_NAME} Privacy Policy — learn how we collect, use, and protect your data.`,
-	alternates: {canonical: '/privacy'}
+	title: TITLE,
+	description: DESCRIPTION,
+	alternates: {canonical: '/privacy'},
+	...pageSocialMetadata({path: '/privacy', title: TITLE, description: DESCRIPTION})
 };
 
 // Keep this date equal to the day the wording last changed.
