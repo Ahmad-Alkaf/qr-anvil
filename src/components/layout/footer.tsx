@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/mark";
-import { GITHUB_REPOSITORY_URL, SITE_NAME, KAFLABS_URL, KAFLABS_PRIVACY_URL, KAFLABS_TERMS_URL, SUPPORT_EMAIL } from "@/lib/constants";
+import { GITHUB_REPOSITORY_URL, KAFLABS_URL, KAFLABS_PRIVACY_URL, KAFLABS_TERMS_URL, SUPPORT_EMAIL } from "@/lib/constants";
 
 const footerLinks = {
   "QR Code Types": [
@@ -49,7 +49,8 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" aria-label={`${SITE_NAME} home`} className="inline-flex">
+            {/* No aria-label: the visible name is the accessible name (WCAG 2.5.3). */}
+            <Link href="/" className="inline-flex">
               <Logo size="sm" />
             </Link>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
