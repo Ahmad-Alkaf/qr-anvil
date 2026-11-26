@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+// The Content-Security-Policy has no 'unsafe-eval'. Without this, Zod tests
+// `Function("")` once in the browser to pick its compiled parser, and the
+// browser logs a CSP violation. The non-compiled parser gives the same results.
+z.config({ jitless: true });
+
 export const QR_TYPES = [
   "URL",
   "WIFI",
