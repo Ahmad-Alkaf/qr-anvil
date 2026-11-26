@@ -2,11 +2,17 @@ import type {Metadata} from 'next';
 import {QrCode, BarChart3, Users} from 'lucide-react';
 import {GITHUB_PROFILE_URL, GITHUB_REPOSITORY_URL, SITE_NAME} from '@/lib/constants';
 import {getSiteStats, formatCount} from '@/lib/stats';
+import {pageSocialMetadata} from '@/lib/seo';
+
+const TITLE = `About ${SITE_NAME}`;
+const DESCRIPTION = `${SITE_NAME} is a modern QR code generator built for speed, simplicity, and powerful analytics. Learn about our mission.`;
 
 export const metadata: Metadata = {
-	title: `About ${SITE_NAME}`,
-	description: `${SITE_NAME} is a modern QR code generator built for speed, simplicity, and powerful analytics. Learn about our mission.`,
-	alternates: {canonical: '/about'}
+	// Absolute: the root template would add "| QR Anvil" a second time.
+	title: {absolute: TITLE},
+	description: DESCRIPTION,
+	alternates: {canonical: '/about'},
+	...pageSocialMetadata({path: '/about', title: TITLE, description: DESCRIPTION})
 };
 
 // Refresh the prerendered page periodically so the stats do not stay
